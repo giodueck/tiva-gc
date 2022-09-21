@@ -6,6 +6,26 @@
 int main()
 {
     LCD_pixel bgColor;
+    LCD_Init();
+    LCD_CS(LOW);
+
+    bgColor = LCD_GetSettings().BGColor;
+    LCD_gClear();
+    LCD_gLine(64, 64, 90, 64, 1, LCD_RED);
+    LCD_gLine(64, 64, 90, 75, 1, LCD_YELLOW);
+    LCD_gLine(64, 64, 90, 90, 1, LCD_GREEN);
+    LCD_gLine(64, 64, 75, 90, 1, LCD_CYAN);
+    LCD_gLine(64, 64, 64, 90, 1, LCD_BLUE);
+    LCD_gLine(64, 64, 90, 55, 1, LCD_MAGENTA);
+    LCD_gLine(64, 64, 55, 90, 1, LCD_BLUE);
+
+
+    while(1);
+}
+
+int main2()
+{
+    LCD_pixel bgColor;
     point old_pos, pos, js = { 2048, 2048 };    // Joystick centered to begin with
     
     // Input init

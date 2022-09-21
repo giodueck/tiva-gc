@@ -381,33 +381,96 @@ void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, LCD_pixel col
         LCD_PushPixel(color.r, color.g, color.b);
 }
 
-void LCD_gLine(int16_t x1, int16_t x2, int16_t y1, int16_t y2, uint8_t stroke, LCD_pixel color)
+void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, LCD_pixel color)
 {
     /*
         Steps:
             1. Define octant
-            2. Brezenham in a buffer
-            3. Draw pixel by pixel using LCD_gDrawPixel
-            4. If stroke is not complete, define shift in position for next line
-            5. Goto 3 if stroke stroke not complete
+            2. Bresenham: draw pixel by pixel using LCD_gDrawPixel
+            3. If stroke is not complete, define shift in position for next line
+            4. Goto 2 if stroke stroke not complete
     */
 
     float m;
+    int16_t aux;
+    uint8_t octant;
+    int16_t x, y;
    
     // 1. Define octant
     // Stay within one half to simplify calculations. This can be done by
     // swapping x's and y's when needed
 
-    // find slope
+    // straight lines are faster with their dedicated primitives 
     if (x1 == x2)
         return LCD_gVLine(x1, y1, y2, stroke, color);
     if (y1 == y2)
         return LCD_gHLine(x1, x2, y1, stroke, color);
-    
-    // avoid division by 0 with vertical lines
-    m = (y2 - y1) / (x2 - x1);
 
+    // move everything to quadrants 1 & 4
+    if (x2 < x1)
+    {
+        aux = x2;
+        x2 = x1;
+        x1 = aux;
+        aux = y2;
+        y2 = y1;
+        y1 = aux;
+    }
     
+    // find slope avoiding division by 0 with vertical lines
+    m = (float) (y2 - y1) / (x2 - x1);
+
+    // find octant
+    if (m > 1.0)
+        octant = 2;
+    else if (m > 0.0)
+        octant = 1;
+    else if (m > -1.0)
+        octant = 8;
+    else
+        octant = 7;
+    
+    // 2. Bresenham in a buffer
+    x = x1;
+    y = y1;
+
+    switch (octant)
+    {
+    case 2:
+        for (y = y1; y < y2 && y < LCD_HEIGHT; y++)
+        {
+            x = (y - y1) / m + x1;
+            if (y >= 0 && y < LCD_HEIGHT && x >= 0 && x < LCD_WIDTH)
+                LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
+        }
+        break;
+    case 1:
+        for (x = x1; x < x2 && x < LCD_WIDTH; x++)
+        {
+            y = m * (x - x1) + y1;
+            if (y >= 0 && y < LCD_HEIGHT && x >= 0 && x < LCD_WIDTH)
+                LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
+        }
+        break;
+    case 8:
+        for (x = x1; x < x2 && x < LCD_WIDTH; x++)
+        {
+            y = m * (x - x1) + y1;
+            if (y >= 0 && y < LCD_HEIGHT && x >= 0 && x < LCD_WIDTH)
+                LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
+        }
+        break;
+    case 7:
+        for (y = y1; y > y2 && y >= 0; y--)
+        {
+            x = (y - y1) / m + x1;
+            if (y >= 0 && y < LCD_HEIGHT && x >= 0 && x < LCD_WIDTH)
+                LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
+        }
+        break;
+    default:
+        return;
+    }
 }
 
 // Filled rectangle

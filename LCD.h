@@ -7,7 +7,7 @@
 #define LOW  0
 
 #define LCD_HEIGHT 132
-#define LCD_WIDTH  130
+#define LCD_WIDTH  132
 
 // Pixel: 18-bits
 // Only bits [5:0] are used
@@ -151,7 +151,7 @@ void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, LCD_pixel col
 //      y2: End row
 //      stroke: Line thickness. Line is centered if stroke is > 1
 //      color: Line color
-void LCD_gLine(int16_t x1, int16_t x2, int16_t y1, int16_t y2, uint8_t stroke, LCD_pixel color);
+void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, LCD_pixel color);
 
 // Filled rectangle
 //  Param:
