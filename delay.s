@@ -9,12 +9,12 @@
 	PRESERVE8 {TRUE} 
 ; Area de programa
 	AREA	|.text|, CODE, READONLY, ALIGN=2
-	EXPORT delay
+	EXPORT _delay
 	ALIGN	2
 
-delay
+_delay
     subs    r0, #1
-    bne     delay
+    bne     _delay
     bx      lr
 	
 	ALIGN

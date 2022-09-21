@@ -439,6 +439,21 @@
               <FileType>1</FileType>
               <FilePath>.\LCD.c</FilePath>
             </File>
+            <File>
+              <FileName>delay.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\delay.c</FilePath>
+            </File>
+            <File>
+              <FileName>tiva-gc.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\tiva-gc.h</FilePath>
+            </File>
+            <File>
+              <FileName>tiva-gc-inc.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\tiva-gc-inc.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

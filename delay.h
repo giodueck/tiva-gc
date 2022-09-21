@@ -3,6 +3,6 @@
 
 #include <stdint.h>
 
-void delay(uint32_t cycles);
+void delay(uint32_t ms);
 
 #endif // DELAY_H

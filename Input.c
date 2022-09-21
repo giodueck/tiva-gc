@@ -19,7 +19,7 @@ int ReadButton(int button)
     }
 }
 
-point ReadJoystick(void)
+point ReadJoystickRaw(void)
 {
     point p;
     
@@ -36,4 +36,13 @@ point ReadJoystick(void)
     ADC0->ISC = 0x0004;             // acknowledge completion
     
     return p;
+}
+
+point ReadJoystick(point old)
+{
+    point new = ReadJoystickRaw();
+    if (abs(old.x - new.x) < 32 && abs(old.y - new.y) < 32)   // check for a change of about 0.78% (~1 pixel) in either axis
+        return old;
+    else
+        return new;
 }

@@ -99,18 +99,18 @@ void LCD_Init(void)
     InitSPI();
     
     GPIOF->DATA |= HIGH;
-    delay(16000000 / 3000 * 150);
+    delay(150);
     GPIOF->DATA |= LOW;
-    delay(16000000 / 3000 * 150);
+    delay(150);
     GPIOF->DATA |= HIGH;                    // Pull reset down, is negative logic
-    delay(16000000 / 3000 * 150);
+    delay(150);
     
     LCD_CS(LOW);
     LCD_Command(LCD_SWRESET);
-    delay(16000000 / 3000 * 150);           // 120 ms or more wait after SW reset
+    delay(150);           // 120 ms or more wait after SW reset
     
     LCD_Command(LCD_SLPOUT);                // Turn off sleep mode
-    delay(16000000 / 3000 * 150);           // 120 ms or more wait after sleep out
+    delay(150);           // 120 ms or more wait after sleep out
     
     LCD_Command(LCD_FRMCTR1);               // Framerate control
     LCD_Data(0x00);
@@ -140,7 +140,7 @@ void LCD_Init(void)
     _active_settings.ColorMode = LCD_PIXEL_FORMAT_666;
     LCD_Command(LCD_COLMOD);                // Set interface pixel format
     LCD_Data(_active_settings.ColorMode);
-    delay(16000000 / 3000 * 10);
+    delay(10);
     
     _active_settings.InversionMode = LCD_INVOFF;    // Screen inversion off
     LCD_Command(_active_settings.InversionMode);
@@ -149,7 +149,7 @@ void LCD_Init(void)
     LCD_Command(LCD_TEOFF);
     
     LCD_Command(LCD_DISPON);                // Turn LCD on
-    delay(16000000 / 3000 * 150);
+    delay(150);
 
     _active_settings.BGColor = LCD_BLACK;
     LCD_CS(HIGH);
@@ -234,7 +234,7 @@ void LCD_CS(uint8_t flag)
 //      rowStart: starting row
 //      colEnd: ending column < LCD_WIDTH
 //      rowEnd: ending row < LCD_HEIGHT
-void LCD_SetArea(uint8_t colStart, uint8_t rowStart, uint8_t colEnd, uint8_t rowEnd)
+void LCD_SetArea(int16_t colStart, int16_t rowStart, int16_t colEnd, int16_t rowEnd)
 {
     uint8_t buffer[4];
     
@@ -253,6 +253,10 @@ void LCD_SetArea(uint8_t colStart, uint8_t rowStart, uint8_t colEnd, uint8_t row
     }
 
     // Check for range
+    if (colStart < 0)
+        colStart = 0;
+    if (rowStart < 0)
+        rowStart = 0;
     if (colEnd >= LCD_WIDTH)
         colEnd = LCD_WIDTH - 1;
     if (rowEnd >= LCD_HEIGHT)
@@ -287,7 +291,7 @@ void LCD_ActivateWrite(void)
 // to have been the last command
 //  Param:
 //      red, green, blue: color value. Bits [5:0] (6 bits) are sent
-void LCD_DrawPixel(uint8_t x, uint8_t y, uint8_t red, uint8_t green, uint8_t blue)
+void LCD_gDrawPixel(uint8_t x, uint8_t y, uint8_t red, uint8_t green, uint8_t blue)
 {
     LCD_SetArea(x, y, x, y);
     LCD_ActivateWrite();
@@ -309,6 +313,8 @@ void LCD_PushPixel(uint8_t red, uint8_t green, uint8_t blue)
 
 // Convert a 3 byte pixel (Eg #FF004A) uint32_t into LCD_pixel
 // Precision loss: 8-bit -> 6-bit
+//  Param:
+//      p: 32-bit integer. Bits [23:0] are used
 LCD_pixel LCD_Ui32ToPixel(uint32_t p)
 {
     LCD_pixel pixel;
@@ -316,6 +322,50 @@ LCD_pixel LCD_Ui32ToPixel(uint32_t p)
     pixel.g = (uint8_t)((float)(p & 0xFF00 >> 8) / 0xFF * 0x3F);
     pixel.b = (uint8_t)((float)(p & 0xFF) / 0xFF * 0x3F);
     return pixel;
+}
+
+// Clear screen to background color
+void LCD_gClear()
+{
+    LCD_gFillRectangle(0, 0, LCD_WIDTH, LCD_HEIGHT, _active_settings.BGColor);
+}
+
+void LCD_gVLine(uint8_t x, uint8_t y1, uint8_t y2, uint8_t stroke, LCD_pixel color)
+{
+    if (stroke == 0)
+        return;
+
+    // Rectangular area, y2 - y1 pixels high, stroke pixels wide
+    LCD_SetArea(x - stroke / 2, y1, x + stroke / 2 + stroke % 2, y2);
+    LCD_ActivateWrite();
+
+    for (int i = 0; i < (y2 - y1) * stroke; i++)
+        LCD_PushPixel(color.r, color.g, color.b);
+}
+
+void LCD_gHLine(uint8_t x1, uint8_t x2, uint8_t y, uint8_t stroke, LCD_pixel color)
+{
+    if (stroke == 0)
+        return;
+
+    // Rectangular area, y2 - y1 pixels high, stroke pixels wide
+    LCD_SetArea(x1, y - stroke / 2, x2, y + stroke / 2 + stroke % 2);
+    LCD_ActivateWrite();
+
+    for (int i = 0; i < (x2 - x1) * stroke; i++)
+        LCD_PushPixel(color.r, color.g, color.b);
+}
+
+void LCD_gLine(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t stroke, LCD_pixel color)
+{
+    /*
+        Steps:
+            1. Define octant
+            2. Brezenham in a buffer
+            3. Draw pixel by pixel using LCD_gDrawPixel
+            4. If stroke is not complete, define shift in position for next line
+            5. Goto 3 if stroke stroke not complete
+    */
 }
 
 // Filled rectangle
@@ -338,21 +388,15 @@ void LCD_gFillRectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h, LCD_pixel co
 //      x, y: column and row of first corner
 //      w, h: width and height
 //      color: LCD_pixel
-void LCD_gRectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h, LCD_pixel color)
+void LCD_gRectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t stroke, LCD_pixel color)
 {
-    if (w <= 0 || h <= 0)
+    if (w == 0 || h == 0)
         return;
 
     LCD_gFillRectangle(x, y, w, h, color);
     
-    if (w <= 2 || h <= 2)
+    if (w <= 2 * stroke || h <= 2 * stroke)
         return;
 
-    LCD_gFillRectangle(x + 1, y + 1, w - 2, h - 2, _active_settings.BGColor);
-}
-
-// Clear screen to background color
-void LCD_gClear()
-{
-    LCD_gFillRectangle(0, 0, LCD_WIDTH, LCD_HEIGHT, _active_settings.BGColor);
+    LCD_gFillRectangle(x + stroke, y + stroke, w - 2 * stroke, h - 2 * stroke, _active_settings.BGColor);
 }

@@ -90,7 +90,7 @@ void LCD_DataBuffer(uint8_t *buffer, uint32_t count);
 //      rowStart: starting row
 //      colEnd: ending column < LCD_WIDTH
 //      rowEnd: ending row < LCD_HEIGHT
-void LCD_SetArea(uint8_t colStart, uint8_t rowStart, uint8_t colEnd, uint8_t rowEnd);
+void LCD_SetArea(int16_t colStart, int16_t rowStart, int16_t colEnd, int16_t rowEnd);
 
 // LCD activate memory write
 // Sends RAM write command, after which any number of pixels can be sent
@@ -103,21 +103,32 @@ void LCD_ActivateWrite(void);
 //      red, green, blue: color value. Bits [5:0] (6 bits) are sent
 void LCD_PushPixel(uint8_t red, uint8_t green, uint8_t blue);
 
-// LCD Draw pixel
-// Sets area of 1 pixel and sends pixel data. Requires LCD_ActivateWrite
-// to have been the last command
-//  Param:
-//      red, green, blue: color value. Bits [5:0] (6 bits) are sent
-void LCD_DrawPixel(uint8_t x, uint8_t y, uint8_t red, uint8_t green, uint8_t blue);
-
 
 
 /* Graphics primitives
  */
 
-// Convert a 3 byte pixel uint32_t into LCD_pixel
+// LCD Draw pixel
+// Sets area of 1 pixel and sends pixel data. Requires LCD_ActivateWrite
+// to have been the last command
+//  Param:
+//      red, green, blue: color value. Bits [5:0] (6 bits) are sent
+void LCD_gDrawPixel(uint8_t x, uint8_t y, uint8_t red, uint8_t green, uint8_t blue);
+
+// Convert a 3 byte pixel (Eg #FF004A) uint32_t into LCD_pixel
 // Precision loss: 8-bit -> 6-bit
+//  Param:
+//      p: 32-bit integer. Bits [23:0] are used
 LCD_pixel LCD_Ui32ToPixel(uint32_t p);
+
+// Clear screen to background color
+void LCD_gClear(void);
+
+void LCD_gVLine(uint8_t x, uint8_t y1, uint8_t y2, uint8_t stroke, LCD_pixel color);
+
+void LCD_gHLine(uint8_t x1, uint8_t x2, uint8_t y, uint8_t stroke, LCD_pixel color);
+
+void LCD_gLine(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t stroke, LCD_pixel color);
 
 // Filled rectangle
 //  Param:
@@ -130,10 +141,18 @@ void LCD_gFillRectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h, LCD_pixel co
 //  Param:
 //      x, y: column and row of first corner
 //      w, h: width and height
+//      stroke: edge width
 //      color: LCD_pixel
-void LCD_gRectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h, LCD_pixel color);
+void LCD_gRectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t stroke, LCD_pixel color);
 
-// Clear screen to background color
-void LCD_gClear(void);
+void LCD_gFillTriangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t x3, uint8_t y3, LCD_pixel color);
+
+void LCD_gTriangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t x3, uint8_t y3, uint8_t stroke, LCD_pixel color);
+
+void LCD_gFillCircle(uint8_t x, uint8_t y, uint8_t radius, LCD_pixel color);
+
+void LCD_gCircle(uint8_t x, uint8_t y, uint8_t radius, uint8_t stroke, LCD_pixel color);
+
+void LCD_gText(uint8_t x, uint8_t y, LCD_pixel color);
 
 #endif // LCD_H

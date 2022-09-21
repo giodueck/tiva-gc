@@ -1,14 +1,12 @@
 #include <stdint.h>
 #include "TM4C123GH6PM.h"
 #include "UART.h"
-#include "InitGPIO.h"
-#include "Input.h"
-#include "LCD.h"
+#include "tiva-gc.h"
 
 int main()
 {
     LCD_pixel bgColor;
-    point old_pos, pos, js;
+    point old_pos, pos, js = { 2048, 2048 };    // Joystick centered to begin with
     
     // Input init
     InitGPIO_EdumkiiButtons();
@@ -19,9 +17,11 @@ int main()
     LCD_CS(LOW);
     
     bgColor = LCD_GetSettings().BGColor;
-    js = ReadJoystick();
-    pos.x = (uint32_t)(js.x / 4096.0f * LCD_WIDTH) - 2;
-    pos.y = LCD_HEIGHT - (uint32_t)(js.y / 4096.0f * LCD_HEIGHT) - 2;
+    js = ReadJoystick(js);    // don't need that much precision
+    js.x = js.x;
+    js.y = js.y;
+    pos.x = (int32_t)(js.x / 4096.0f * LCD_WIDTH);
+    pos.y = LCD_HEIGHT - (int32_t)(js.y / 4096.0f * LCD_HEIGHT);
     if (pos.x < 2)
         pos.x += 2;
     else if (pos.x > LCD_WIDTH - 2)
@@ -36,9 +36,11 @@ int main()
     while (1)
     {
         old_pos = pos;
-        js = ReadJoystick();
-        pos.x = (uint32_t)(js.x / 4096.0f * LCD_WIDTH) - 2;
-        pos.y = LCD_HEIGHT - (uint32_t)(js.y / 4096.0f * LCD_HEIGHT) - 2;
+        js = ReadJoystick(js);
+        js.x = js.x;
+        js.y = js.y;
+        pos.x = (int32_t)(js.x / 4096.0f * LCD_WIDTH);
+        pos.y = LCD_HEIGHT - (int32_t)(js.y / 4096.0f * LCD_HEIGHT);
         if (pos.x < 2)
             pos.x += 2;
         else if (pos.x > LCD_WIDTH - 2)
@@ -50,8 +52,8 @@ int main()
 
         if (old_pos.x != pos.x || old_pos.y != pos.y)
         {
-            LCD_gFillRectangle((uint8_t) old_pos.x, (uint8_t) old_pos.y, 4, 4, bgColor);
-            LCD_gRectangle((uint8_t) pos.x, (uint8_t) pos.y, 4, 4, LCD_RED);
+            LCD_gFillRectangle((uint8_t) old_pos.x, (uint8_t) old_pos.y, 5, 5, bgColor);
+            LCD_gRectangle((uint8_t) pos.x, (uint8_t) pos.y, 5, 5, 2, LCD_RED);
         }
     }
 }
@@ -90,7 +92,7 @@ int main1()
     
     while (1)
     {
-        js = ReadJoystick();       // if these readings are bad (crosstalk) check if boosterpack is connected nicely
+        js = ReadJoystickRaw();       // if these readings are bad (crosstalk) check if boosterpack is connected nicely
         UART_OutChar('(');
         UART_OutUDec(js.x);
         UART_OutString(", ");
