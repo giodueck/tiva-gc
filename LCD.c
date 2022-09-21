@@ -1,6 +1,7 @@
 #include "LCD.h"
 #include "TM4C123GH6PM.h"
 #include "delay.h"
+#include "tiva-gc-inc.h"
 
 #define DATAMODE_ACTIVESTATE HIGH
 #define RESET_ACTIVESTATE    LOW
@@ -330,33 +331,57 @@ void LCD_gClear()
     LCD_gFillRectangle(0, 0, LCD_WIDTH, LCD_HEIGHT, _active_settings.BGColor);
 }
 
-void LCD_gVLine(uint8_t x, uint8_t y1, uint8_t y2, uint8_t stroke, LCD_pixel color)
+void LCD_gVLine(int16_t x, int16_t y1, int16_t y2, uint8_t stroke, LCD_pixel color)
 {
+    int16_t aux;
+    
     if (stroke == 0)
+        return;
+    
+    if (y1 > y2)
+    {
+        aux = y1;
+        y1 = y2;
+        y2 = aux;
+    }
+    
+    if (y1 == y2)
         return;
 
     // Rectangular area, y2 - y1 pixels high, stroke pixels wide
-    LCD_SetArea(x - stroke / 2, y1, x + stroke / 2 + stroke % 2, y2);
+    LCD_SetArea(max(0, x - ((stroke - 1) >> 1)), y1, min(LCD_WIDTH - 1, x + (stroke >> 1)), y2);
     LCD_ActivateWrite();
 
-    for (int i = 0; i < (y2 - y1) * stroke; i++)
+    for (int i = 0; i < (y2 - y1) * stroke * x; i++)
         LCD_PushPixel(color.r, color.g, color.b);
 }
 
-void LCD_gHLine(uint8_t x1, uint8_t x2, uint8_t y, uint8_t stroke, LCD_pixel color)
+void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, LCD_pixel color)
 {
+    int16_t aux;
+    
     if (stroke == 0)
+        return;
+    
+    if (x1 > x2)
+    {
+        aux = x1;
+        x1 = x2;
+        x2 = aux;
+    }
+    
+    if (x1 == x2)
         return;
 
     // Rectangular area, y2 - y1 pixels high, stroke pixels wide
-    LCD_SetArea(x1, y - stroke / 2, x2, y + stroke / 2 + stroke % 2);
+    LCD_SetArea(x1, max(0, y - ((stroke - 1) >> 1)), x2, min(LCD_HEIGHT - 1, y + (stroke >> 1)));
     LCD_ActivateWrite();
 
-    for (int i = 0; i < (x2 - x1) * stroke; i++)
+    for (int i = 0; i < (x2 - x1) * stroke * y; i++)
         LCD_PushPixel(color.r, color.g, color.b);
 }
 
-void LCD_gLine(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t stroke, LCD_pixel color)
+void LCD_gLine(int16_t x1, int16_t x2, int16_t y1, int16_t y2, uint8_t stroke, LCD_pixel color)
 {
     /*
         Steps:
@@ -366,6 +391,23 @@ void LCD_gLine(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t stroke, L
             4. If stroke is not complete, define shift in position for next line
             5. Goto 3 if stroke stroke not complete
     */
+
+    float m;
+   
+    // 1. Define octant
+    // Stay within one half to simplify calculations. This can be done by
+    // swapping x's and y's when needed
+
+    // find slope
+    if (x1 == x2)
+        return LCD_gVLine(x1, y1, y2, stroke, color);
+    if (y1 == y2)
+        return LCD_gHLine(x1, x2, y1, stroke, color);
+    
+    // avoid division by 0 with vertical lines
+    m = (y2 - y1) / (x2 - x1);
+
+    
 }
 
 // Filled rectangle
@@ -373,7 +415,7 @@ void LCD_gLine(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t stroke, L
 //      x, y: column and row of first corner
 //      w, h: width and height
 //      color: LCD_pixel
-void LCD_gFillRectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h, LCD_pixel color)
+void LCD_gFillRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, LCD_pixel color)
 {
     LCD_SetArea(x, y, x + w, y + h);
     LCD_ActivateWrite();
@@ -388,15 +430,13 @@ void LCD_gFillRectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h, LCD_pixel co
 //      x, y: column and row of first corner
 //      w, h: width and height
 //      color: LCD_pixel
-void LCD_gRectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t stroke, LCD_pixel color)
+void LCD_gRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, LCD_pixel color)
 {
     if (w == 0 || h == 0)
         return;
 
-    LCD_gFillRectangle(x, y, w, h, color);
-    
-    if (w <= 2 * stroke || h <= 2 * stroke)
-        return;
-
-    LCD_gFillRectangle(x + stroke, y + stroke, w - 2 * stroke, h - 2 * stroke, _active_settings.BGColor);
+    LCD_gVLine(x, y, y + h, stroke, color);
+    LCD_gVLine(x + w - (stroke >> 1), y, y + h, stroke, color);
+    LCD_gHLine(x, x + w, y, stroke, color);
+    LCD_gHLine(x, x + w, y + h - (stroke >> 1), stroke, color);
 }

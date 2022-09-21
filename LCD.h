@@ -124,18 +124,41 @@ LCD_pixel LCD_Ui32ToPixel(uint32_t p);
 // Clear screen to background color
 void LCD_gClear(void);
 
-void LCD_gVLine(uint8_t x, uint8_t y1, uint8_t y2, uint8_t stroke, LCD_pixel color);
+// Vertical line (fast)
+//  Param:
+//      x: Column
+//      y1: Start row
+//      y2: End row
+//      stroke: Line thickness. Line is centered on x if stroke is > 1
+//      color: Line color
+void LCD_gVLine(int16_t x, int16_t y1, int16_t y2, uint8_t stroke, LCD_pixel color);
 
-void LCD_gHLine(uint8_t x1, uint8_t x2, uint8_t y, uint8_t stroke, LCD_pixel color);
+// Horizontal line (fast)
+//  Param:
+//      x1: Start column
+//      x2: End column
+//      y: Row
+//      stroke: Line thickness. Line is centered on y if stroke is > 1
+//      color: Line color
+void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, LCD_pixel color);
 
-void LCD_gLine(uint8_t x1, uint8_t x2, uint8_t y1, uint8_t y2, uint8_t stroke, LCD_pixel color);
+// Just a line in any direction. For straight vertical or horizontal lines
+// LCD_gVLine and LCD_gHLine are used instead
+//  Param:
+//      x1: Start column
+//      x2: End column
+//      y1: Start row
+//      y2: End row
+//      stroke: Line thickness. Line is centered if stroke is > 1
+//      color: Line color
+void LCD_gLine(int16_t x1, int16_t x2, int16_t y1, int16_t y2, uint8_t stroke, LCD_pixel color);
 
 // Filled rectangle
 //  Param:
 //      x, y: column and row of first corner
 //      w, h: width and height
 //      color: LCD_pixel
-void LCD_gFillRectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h, LCD_pixel color);
+void LCD_gFillRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, LCD_pixel color);
 
 // Rectangle outline
 //  Param:
@@ -143,16 +166,16 @@ void LCD_gFillRectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h, LCD_pixel co
 //      w, h: width and height
 //      stroke: edge width
 //      color: LCD_pixel
-void LCD_gRectangle(uint8_t x, uint8_t y, uint8_t w, uint8_t h, uint8_t stroke, LCD_pixel color);
+void LCD_gRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, LCD_pixel color);
 
-void LCD_gFillTriangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t x3, uint8_t y3, LCD_pixel color);
+void LCD_gFillTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, LCD_pixel color);
 
-void LCD_gTriangle(uint8_t x1, uint8_t y1, uint8_t x2, uint8_t y2, uint8_t x3, uint8_t y3, uint8_t stroke, LCD_pixel color);
+void LCD_gTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t stroke, LCD_pixel color);
 
-void LCD_gFillCircle(uint8_t x, uint8_t y, uint8_t radius, LCD_pixel color);
+void LCD_gFillCircle(int16_t x, int16_t y, uint8_t radius, LCD_pixel color);
 
-void LCD_gCircle(uint8_t x, uint8_t y, uint8_t radius, uint8_t stroke, LCD_pixel color);
+void LCD_gCircle(int16_t x, int16_t y, uint8_t radius, uint8_t stroke, LCD_pixel color);
 
-void LCD_gText(uint8_t x, uint8_t y, LCD_pixel color);
+void LCD_gText(int16_t x, int16_t y, LCD_pixel color);
 
 #endif // LCD_H

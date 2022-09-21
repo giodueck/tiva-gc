@@ -53,7 +53,7 @@ int main()
         if (old_pos.x != pos.x || old_pos.y != pos.y)
         {
             LCD_gFillRectangle((uint8_t) old_pos.x, (uint8_t) old_pos.y, 5, 5, bgColor);
-            LCD_gRectangle((uint8_t) pos.x, (uint8_t) pos.y, 5, 5, 2, LCD_RED);
+            LCD_gRectangle((uint8_t) pos.x, (uint8_t) pos.y, 5, 5, 1, LCD_RED);
         }
     }
 }
