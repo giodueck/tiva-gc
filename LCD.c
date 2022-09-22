@@ -99,9 +99,6 @@ void LCD_Init(void)
 {
     InitSPI();
     
-    GPIOF->DATA |= HIGH;
-    delay(150);
-    GPIOF->DATA |= LOW;
     delay(150);
     GPIOF->DATA |= HIGH;                    // Pull reset down, is negative logic
     delay(150);
@@ -388,7 +385,6 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, L
             1. Define octant
             2. Bresenham: draw pixel by pixel using LCD_gDrawPixel
             3. If stroke is not complete, define shift in position for next line
-            4. Goto 2 if stroke stroke not complete
     */
 
     float m;
@@ -469,6 +465,35 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, L
         }
         break;
     default:
+        return;
+    }
+
+    // 3. If stroke is not complete, define shift in position for next line
+    if (stroke > 1)
+    {
+        for (int i = - ((stroke - 1) >> 1); i < (stroke >> 1); i++)
+        {
+            // original line is already drawn
+            if (i == 0)
+                continue;
+            
+            // move coordinates somewhere else and draw line with stroke 1
+            switch (octant)
+            {
+            case 2: case 7:
+                x1++;
+                x2++;
+                break;
+            case 1: case 8:
+                y1++;
+                y2++;
+                break;
+            default:
+                break;
+            }
+
+            LCD_gLine(x1, y1, x2, y2, 1, color);
+        }
         return;
     }
 }

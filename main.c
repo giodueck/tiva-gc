@@ -11,13 +11,13 @@ int main()
 
     bgColor = LCD_GetSettings().BGColor;
     LCD_gClear();
-    LCD_gLine(64, 64, 90, 64, 1, LCD_RED);
-    LCD_gLine(64, 64, 90, 75, 1, LCD_YELLOW);
-    LCD_gLine(64, 64, 90, 90, 1, LCD_GREEN);
-    LCD_gLine(64, 64, 75, 90, 1, LCD_CYAN);
-    LCD_gLine(64, 64, 64, 90, 1, LCD_BLUE);
     LCD_gLine(64, 64, 90, 55, 1, LCD_MAGENTA);
-    LCD_gLine(64, 64, 55, 90, 1, LCD_BLUE);
+    LCD_gLine(64, 64, 90, 64, 2, LCD_RED);
+    LCD_gLine(64, 64, 90, 75, 3, LCD_YELLOW);
+    LCD_gLine(64, 64, 90, 90, 4, LCD_GREEN);
+    LCD_gLine(64, 64, 75, 90, 5, LCD_CYAN);
+    LCD_gLine(64, 64, 64, 90, 6, LCD_BLUE);
+    LCD_gLine(64, 64, 55, 90, 7, LCD_MAGENTA);
 
 
     while(1);

@@ -149,7 +149,7 @@ void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, LCD_pixel col
 //      x2: End column
 //      y1: Start row
 //      y2: End row
-//      stroke: Line thickness. Line is centered if stroke is > 1
+//      stroke: Line thickness
 //      color: Line color
 void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, LCD_pixel color);
 
