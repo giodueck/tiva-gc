@@ -1,9 +1,8 @@
 #include <stdint.h>
 #include "TM4C123GH6PM.h"
-#include "UART.h"
 #include "tiva-gc.h"
 
-int main()
+int main3()
 {
     LCD_pixel bgColor;
     LCD_Init();
@@ -23,10 +22,13 @@ int main()
     while(1);
 }
 
-int main2()
+int main()
 {
-    LCD_pixel bgColor;
+    LCD_Settings actSettings;
     point old_pos, pos, js = { 2048, 2048 };    // Joystick centered to begin with
+    LCD_pixel colors[6] = { LCD_RED, LCD_YELLOW, LCD_GREEN, LCD_CYAN, LCD_BLUE, LCD_MAGENTA };
+    uint8_t i = 0, changeFlag = 0;
+    uint8_t h = 10, w = 10;
     
     // Input init
     InitGPIO_EdumkiiButtons();
@@ -36,44 +38,68 @@ int main2()
     LCD_Init();
     LCD_CS(LOW);
     
-    bgColor = LCD_GetSettings().BGColor;
+    actSettings = LCD_GetSettings();
     js = ReadJoystick(js);    // don't need that much precision
     js.x = js.x;
     js.y = js.y;
-    pos.x = (int32_t)(js.x / 4096.0f * LCD_WIDTH);
-    pos.y = LCD_HEIGHT - (int32_t)(js.y / 4096.0f * LCD_HEIGHT);
+    pos.x = (int32_t)(js.x / 4095.0f * LCD_WIDTH);
+    pos.y = LCD_HEIGHT - (int32_t)(js.y / 4095.0f * LCD_HEIGHT);
     if (pos.x < 2)
         pos.x += 2;
-    else if (pos.x > LCD_WIDTH - 2)
-        pos.x -= 2;
+    else if (pos.x >= LCD_WIDTH)
+        pos.x = LCD_WIDTH - 1;
     if (pos.y < 2)
         pos.y += 2;
-    else if (pos.y > LCD_HEIGHT - 2)
-        pos.y -= 2;
+    else if (pos.y >= LCD_HEIGHT)
+        pos.y = LCD_HEIGHT - 1;
 
     LCD_gClear();
 
     while (1)
     {
+        // Detecta pulsaciones de los botones
+        if (ReadButton(BUTTON_EDUMKII_SW1))
+        {
+            i = (i + 1) % 6;    // Cycle through primary and secondary RGB colors
+            changeFlag = 1;
+        }
+        if (ReadButton(BUTTON_EDUMKII_SW2))
+        {
+            i = (i + 5) % 6;
+            changeFlag = 1;
+        }
+        if (ReadButton(BUTTON_EDUMKII_SEL))
+        {
+            LCD_SetInversion(!actSettings.InversionMode);
+            actSettings.InversionMode = !actSettings.InversionMode;
+            changeFlag = 1;
+        }
+
+        // Detecta la posicion del joystick y la convierte a un punto en el display
         old_pos = pos;
         js = ReadJoystick(js);
         js.x = js.x;
         js.y = js.y;
-        pos.x = (int32_t)(js.x / 4096.0f * LCD_WIDTH);
-        pos.y = LCD_HEIGHT - (int32_t)(js.y / 4096.0f * LCD_HEIGHT);
+        pos.x = (int32_t)(js.x / 4095.0f * LCD_WIDTH);
+        pos.y = LCD_HEIGHT - (int32_t)(js.y / 4095.0f * LCD_HEIGHT);
         if (pos.x < 2)
             pos.x += 2;
-        else if (pos.x > LCD_WIDTH - 2)
-            pos.x -= 2;
+        else if (pos.x >= LCD_WIDTH)
+            pos.x = LCD_WIDTH - 1;
         if (pos.y < 2)
             pos.y += 2;
-        else if (pos.y > LCD_HEIGHT - 2)
-            pos.y -= 2;
+        else if (pos.y >= LCD_HEIGHT)
+            pos.y = LCD_HEIGHT - 1;
 
-        if (old_pos.x != pos.x || old_pos.y != pos.y)
+        // Dibuja sobre el display
+        if (old_pos.x != pos.x || old_pos.y != pos.y || changeFlag)
         {
-            LCD_gFillRectangle((uint8_t) old_pos.x, (uint8_t) old_pos.y, 5, 5, bgColor);
-            LCD_gRectangle((uint8_t) pos.x, (uint8_t) pos.y, 5, 5, 1, LCD_RED);
+            LCD_gFillRectangle((uint8_t) old_pos.x - 5, (uint8_t) old_pos.y - 5, 10, 10, actSettings.BGColor);
+            LCD_gLine(64, 64, (uint8_t) old_pos.x, (uint8_t) old_pos.y, 1, actSettings.BGColor);
+            LCD_gLine(64, 64, (uint8_t) pos.x, (uint8_t) pos.y, 1, colors[i]);
+            LCD_gRectangle((uint8_t) pos.x - 5, (uint8_t) pos.y - 5, 10, 10, 1, colors[i]);
+
+            changeFlag = 0;
         }
     }
 }
@@ -96,39 +122,5 @@ int main0()
         
         if (++counter == LCD_HEIGHT * LCD_WIDTH)
             counter = 0;
-    }
-}
-
-int main1()
-{
-    point js;
-    
-    InitGPIO_TivaButtons();
-    InitGPIO_EdumkiiButtons();
-    InitGPIO_EdumkiiJoystick();
-    
-    UART_Init();
-    UART_OutString("\r\nJoystick and buttons test\r\n");
-    
-    while (1)
-    {
-        js = ReadJoystickRaw();       // if these readings are bad (crosstalk) check if boosterpack is connected nicely
-        UART_OutChar('(');
-        UART_OutUDec(js.x);
-        UART_OutString(", ");
-        UART_OutUDec(js.y);
-        UART_OutString(") ");
-        if (ReadButton(TIVAC_SW1))
-            UART_OutString("TSW1 ");
-        if (ReadButton(TIVAC_SW2))
-            UART_OutString("TSW2 ");
-        if (ReadButton(EDUMKII_SW1))
-            UART_OutString("ESW1 ");
-        if (ReadButton(EDUMKII_SW2))
-            UART_OutString("ESW2 ");
-        if (ReadButton(EDUMKII_SEL))
-            UART_OutString("ESEL ");
-        
-        UART_OutString("                                      \r");
     }
 }

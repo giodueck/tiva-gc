@@ -5,6 +5,8 @@
 
 #define HIGH 1
 #define LOW  0
+#define ON   1
+#define OFF  0
 
 #define LCD_HEIGHT 132
 #define LCD_WIDTH  132
@@ -25,13 +27,13 @@ typedef struct LCD_pixel
 #define LCD_MAGENTA (LCD_pixel) { 0x3F, 0x00, 0x3F }
 #define LCD_CYAN    (LCD_pixel) { 0x00, 0x3F, 0x3F }
 
-struct LCD_Settings
+typedef struct LCD_Settings
 {
     uint8_t InversionMode;
     uint8_t ColorMode;
     uint8_t MemoryAccessCTL;
     LCD_pixel BGColor;
-};
+} LCD_Settings;
 
 
 
@@ -45,13 +47,18 @@ void LCD_Init(void);
 // Get LCD settings
 //  Return:
 //      struct LCD_Settings: currently active settings
-struct LCD_Settings LCD_GetSettings(void);
+LCD_Settings LCD_GetSettings(void);
 
 // Set LCD Background color
-// Used by some drawing primitives
+// The background color is used by some drawing primitives like LCD_gClear
 //  Param:
 //      LCD_pixel: new background color
 void LCD_SetBGColor(LCD_pixel bgColor);
+
+// Turn display inversion on or off
+//  Param:
+//      flag: 1 or 0, ON or OFF
+void LCD_SetInversion(uint8_t flag);
 
 
 
@@ -170,6 +177,13 @@ void LCD_gRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, 
 
 void LCD_gFillTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, LCD_pixel color);
 
+// Triangle outline
+//  Param:
+//      x1, y1: first vertex
+//      x2, y2: second vertex
+//      x3, t3: third vertex
+//      stroke: edge width
+//      color: LCD_pixel
 void LCD_gTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t stroke, LCD_pixel color);
 
 void LCD_gFillCircle(int16_t x, int16_t y, uint8_t radius, LCD_pixel color);

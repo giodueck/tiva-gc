@@ -1,22 +1,100 @@
 #include "Input.h"
+#include "delay.h"
 
-int ReadButton(int button)
+int ReadButtonRaw(int button)
 {
     switch (button)
     {
-        case TIVAC_SW1:
+        #ifdef DISABLE_LCD
+        case BUTTON_TIVAC_SW1:
             return ((GPIOF->DATA & 0x10) >> 4) ^ 0x01;
-        case TIVAC_SW2:
+        case BUTTON_TIVAC_SW2:
             return (GPIOF->DATA & 0x01) ^ 0x01;
-        case EDUMKII_SW1:
+        #endif
+        case BUTTON_EDUMKII_SW1:
             return ((GPIOD->DATA & 0x40) >> 6) ^ 0x01;
-        case EDUMKII_SW2:
+        case BUTTON_EDUMKII_SW2:
             return ((GPIOD->DATA & 0x80) >> 7) ^ 0x01;
-        case EDUMKII_SEL:
+        case BUTTON_EDUMKII_SEL:
             return ((GPIOE->DATA & 0x10) >> 4) ^ 0x01;
         default:
             return 0;
     }
+}
+
+int ReadButton(int button)
+{
+    static uint8_t tsw1 = 0, tsw2 = 0, esw1 = 0, esw2 = 0, esel = 0;
+    uint8_t r = 0;
+
+    // Read once, depending on read and state: wait, read again
+    // If the first read is 0 or the button was already pressed, the result is 0
+    // Whatever value the second read gets is ANDed with the first, which is 1
+    // So second read is also the result
+    switch (button)
+    {
+        #ifdef DISABLE_LCD
+        case BUTTON_TIVAC_SW1:
+            r = ReadButtonRaw(button);
+            if (!r)
+                tsw1 = 0;
+            else if (!tsw1)
+            {
+                delay(10);
+                tsw1 = ReadButtonRaw(button);
+                return tsw1;
+            }
+            break;
+        case BUTTON_TIVAC_SW2:
+            r = ReadButtonRaw(button);
+            if (!r)
+                tsw2 = 0;
+            else if (!tsw2)
+            {
+                delay(10);
+                tsw2 = ReadButtonRaw(button);
+                return tsw2;
+            }
+            break;
+        #endif
+        case BUTTON_EDUMKII_SW1:
+            r = ReadButtonRaw(button);
+            if (!r)
+                esw1 = 0;
+            else if (!esw1)
+            {
+                delay(10);
+                esw1 = ReadButtonRaw(button);
+                return esw1;
+            }
+            break;
+        case BUTTON_EDUMKII_SW2:
+            r = ReadButtonRaw(button);
+            if (!r)
+                esw2 = 0;
+            else if (!esw2)
+            {
+                delay(10);
+                esw2 = ReadButtonRaw(button);
+                return esw2;
+            }
+            break;
+        case BUTTON_EDUMKII_SEL:
+            r = ReadButtonRaw(button);
+            if (!r)
+                esel = 0;
+            else if (!esel)
+            {
+                delay(10);
+                esel = ReadButtonRaw(button);
+                return esel;
+            }
+            break;
+        default:
+            break;
+    }
+
+    return 0;
 }
 
 point ReadJoystickRaw(void)

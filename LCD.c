@@ -56,7 +56,7 @@
 #define LCD_PWCTR5  0xC4
 
 /* Active settings */
-static struct LCD_Settings _active_settings = {0};
+static LCD_Settings _active_settings = {0};
 
 void InitSPI(void);
 void WriteSPI(uint8_t data);
@@ -156,7 +156,7 @@ void LCD_Init(void)
 // Get LCD settings
 //  Return:
 //      struct LCD_Settings: currently active settings
-struct LCD_Settings LCD_GetSettings()
+LCD_Settings LCD_GetSettings()
 {
     return _active_settings;
 }
@@ -168,6 +168,15 @@ struct LCD_Settings LCD_GetSettings()
 void LCD_SetBGColor(LCD_pixel bgColor)
 {
     _active_settings.BGColor = bgColor;
+}
+
+// Turn display inversion on or off
+//  Param:
+//      flag: 1 or 0, ON or OFF
+void LCD_SetInversion(uint8_t flag)
+{
+    _active_settings.InversionMode = flag;
+    LCD_Command(flag ? LCD_INVON : LCD_INVOFF);
 }
 
 void WriteSPI(uint8_t data)
@@ -527,4 +536,9 @@ void LCD_gRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, 
     LCD_gVLine(x + w - (stroke >> 1), y, y + h, stroke, color);
     LCD_gHLine(x, x + w, y, stroke, color);
     LCD_gHLine(x, x + w, y + h - (stroke >> 1), stroke, color);
+}
+
+void LCD_gTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t stroke, LCD_pixel color)
+{
+
 }
