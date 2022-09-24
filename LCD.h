@@ -2,6 +2,7 @@
 #define LCD_H
 
 #include <stdint.h>
+#include "tiva-gc-inc.h"
 
 #define HIGH 1
 #define LOW  0
@@ -46,7 +47,7 @@ void LCD_Init(void);
 
 // Get LCD settings
 //  Return:
-//      struct LCD_Settings: currently active settings
+//      LCD_Settings: currently active settings
 LCD_Settings LCD_GetSettings(void);
 
 // Set LCD Background color
@@ -71,27 +72,8 @@ void LCD_SetInversion(uint8_t flag);
 //      flag: HIGH = Deselect, LOW = Select
 void LCD_CS(uint8_t flag);
 
-// LCD send command byte
-// Sets Register select to Command mode and sends a byte
-//  Param:
-//      command: opcode
-void LCD_Command(uint8_t command);
-
-// LCD send data byte
-// Sets Register select to Data mode and sends a byte
-//  Param:
-//      data: data byte
-void LCD_Data(uint8_t data);
-
-// LCD send data bytes
-// Sets Register select to Data mode and sends multiple bytes
-//  Param:
-//      buffer: data byte array
-//      count: buffer element count
-void LCD_DataBuffer(uint8_t *buffer, uint32_t count);
-
 // LCD set window position / area
-// Define area to draw inside of. Out of range vaues ignored
+// Define area to draw inside of. Useful when paired with LCD_ActivateWrite and LCD_PushPixel
 //  Param:
 //      colStart: starting column
 //      rowStart: starting row
@@ -100,12 +82,13 @@ void LCD_DataBuffer(uint8_t *buffer, uint32_t count);
 void LCD_SetArea(int16_t colStart, int16_t rowStart, int16_t colEnd, int16_t rowEnd);
 
 // LCD activate memory write
-// Sends RAM write command, after which any number of pixels can be sent
+// Sends RAM write command, after which any number of pixels can be sent.
+// Useful when paired with LCD_SetArea and LCD_PushPixel
 void LCD_ActivateWrite(void);
 
 // LCD write pixel data
-// Sends pixel data to current active window. Requires LCD_ActivateWrite
-// to have been the last command
+// Sends pixel data to current active window area. Requires LCD_ActivateWrite
+// to have been the last command, and requires an area to have been defined
 //  Param:
 //      red, green, blue: color value. Bits [5:0] (6 bits) are sent
 void LCD_PushPixel(uint8_t red, uint8_t green, uint8_t blue);
@@ -175,16 +158,16 @@ void LCD_gFillRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, LCD_pixel co
 //      color: LCD_pixel
 void LCD_gRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, LCD_pixel color);
 
-void LCD_gFillTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, LCD_pixel color);
+void LCD_gFillTriangle(point v1, point v2, point v3, LCD_pixel color);
 
 // Triangle outline
 //  Param:
-//      x1, y1: first vertex
-//      x2, y2: second vertex
-//      x3, t3: third vertex
+//      v1: first vertex
+//      v2: second vertex
+//      v3: third vertex
 //      stroke: edge width
 //      color: LCD_pixel
-void LCD_gTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t stroke, LCD_pixel color);
+void LCD_gTriangle(point v1, point v2, point v3, uint8_t stroke, LCD_pixel color);
 
 void LCD_gFillCircle(int16_t x, int16_t y, uint8_t radius, LCD_pixel color);
 

@@ -60,7 +60,11 @@ static LCD_Settings _active_settings = {0};
 
 void InitSPI(void);
 void WriteSPI(uint8_t data);
+void LCD_Command(uint8_t command);
+void LCD_Data(uint8_t data);
+void LCD_DataBuffer(uint8_t *buffer, uint32_t count);
 
+// Initializes SSI as SPI to EDUMKII display
 void InitSPI(void)
 {
     SYSCTL->RCGCSSI |= (1 << 2);            // Enable SSI2
@@ -179,6 +183,7 @@ void LCD_SetInversion(uint8_t flag)
     LCD_Command(flag ? LCD_INVON : LCD_INVOFF);
 }
 
+// Write a byte of data to the SPI buffer and wait for it to be sent
 void WriteSPI(uint8_t data)
 {
     SSI2->DR = data;
@@ -354,6 +359,10 @@ void LCD_gVLine(int16_t x, int16_t y1, int16_t y2, uint8_t stroke, LCD_pixel col
     if (y1 == y2)
         return;
 
+    // Check that the line is inside the screen. If not, no point clipping it to the edge
+    if (x - ((stroke - 1) >> 1) < 0 && x + (stroke >> 1) < 0 || x - ((stroke - 1) >> 1) > (LCD_WIDTH - 1) && x + (stroke >> 1) > (LCD_WIDTH - 1))
+        return;
+
     // Rectangular area, y2 - y1 pixels high, stroke pixels wide
     LCD_SetArea(max(0, x - ((stroke - 1) >> 1)), y1, min(LCD_WIDTH - 1, x + (stroke >> 1)), y2);
     LCD_ActivateWrite();
@@ -377,6 +386,10 @@ void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, LCD_pixel col
     }
     
     if (x1 == x2)
+        return;
+    
+    // Check that the line is inside the screen. If not, no point clipping it to the edge
+    if (y - ((stroke - 1) >> 1) < 0 && y + (stroke >> 1) < 0 || y - ((stroke - 1) >> 1) > (LCD_HEIGHT - 1) && y + (stroke >> 1) > (LCD_HEIGHT - 1))
         return;
 
     // Rectangular area, y2 - y1 pixels high, stroke pixels wide
@@ -538,7 +551,21 @@ void LCD_gRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, 
     LCD_gHLine(x, x + w, y + h - (stroke >> 1), stroke, color);
 }
 
-void LCD_gTriangle(int16_t x1, int16_t y1, int16_t x2, int16_t y2, int16_t x3, int16_t y3, uint8_t stroke, LCD_pixel color)
+// Triangle outline
+//  Param:
+//      v1: first vertex
+//      v2: second vertex
+//      v3: third vertex
+//      stroke: edge width
+//      color: LCD_pixel
+void LCD_gTriangle(point v1, point v2, point v3, uint8_t stroke, LCD_pixel color)
+{
+    LCD_gLine(v1.x, v1.y, v2.x, v2.y, stroke, color);
+    LCD_gLine(v2.x, v2.y, v3.x, v3.y, stroke, color);
+    LCD_gLine(v3.x, v3.y, v1.x, v1.y, stroke, color);
+}
+
+void LCD_gFillTriangle(point v1, point v2, point v3, LCD_pixel color)
 {
 
 }

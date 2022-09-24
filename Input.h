@@ -12,11 +12,6 @@
 #define BUTTON_EDUMKII_SW2 3
 #define BUTTON_EDUMKII_SEL 4
 
-typedef struct
-{
-    int32_t x, y;
-} point;
-
 // Reads a button.
 //  Param:
 //      button: one of BUTTON_EDUMKII_SW1, BUTTON_EDUMKII_SW2, BUTTON_EDUMKII_SEL
