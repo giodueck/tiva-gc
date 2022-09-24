@@ -493,7 +493,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, L
     // 3. If stroke is not complete, define shift in position for next line
     if (stroke > 1)
     {
-        for (int i = - (stroke >> 1); i < ((stroke - 1) >> 1); i++)
+        for (int i = - (stroke >> 1); i <= ((stroke - 1) >> 1); i++)
         {
             // original line is already drawn
             if (i == 0)
