@@ -218,7 +218,7 @@ void LCD_Data(uint8_t data)
 void LCD_DataBuffer(uint8_t *buffer, uint32_t count)
 {
     GPIOF->DATA |= (1 << 4);    // Data mode
-    for (int i = 0; i < count; i++)
+    for (uint32_t i = 0; i < count; i++)
     {
         WriteSPI(buffer[i]);
     }
@@ -357,7 +357,7 @@ void LCD_gVLine(int16_t x, int16_t y1, int16_t y2, uint8_t stroke, LCD_pixel col
     }
 
     // Check that the line is inside the screen. If not, no point clipping it to the edge
-    if (x - ((stroke - 1) >> 1) < 0 && x + (stroke >> 1) < 0 || x - ((stroke - 1) >> 1) > (LCD_WIDTH - 1) && x + (stroke >> 1) > (LCD_WIDTH - 1))
+    if ((x - ((stroke - 1) >> 1) < 0 && x + (stroke >> 1) < 0) || (x - ((stroke - 1) >> 1) > (LCD_WIDTH - 1) && x + (stroke >> 1) > (LCD_WIDTH - 1)))
         return;
 
     // Rectangular area, y2 - y1 pixels high, stroke pixels wide
@@ -383,7 +383,7 @@ void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, LCD_pixel col
     }
     
     // Check that the line is inside the screen. If not, no point clipping it to the edge
-    if (y - ((stroke - 1) >> 1) < 0 && y + (stroke >> 1) < 0 || y - ((stroke - 1) >> 1) > (LCD_HEIGHT - 1) && y + (stroke >> 1) > (LCD_HEIGHT - 1))
+    if ((y - ((stroke - 1) >> 1) < 0 && y + (stroke >> 1) < 0) || (y - ((stroke - 1) >> 1) > (LCD_HEIGHT - 1) && y + (stroke >> 1) > (LCD_HEIGHT - 1)))
         return;
 
     // Rectangular area, y2 - y1 pixels high, stroke pixels wide
@@ -433,11 +433,11 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, L
     m = (float) (y2 - y1) / (x2 - x1);
 
     // find octant
-    if (m > 1.0)
+    if (m > 1.0f)
         octant = 2;
-    else if (m > 0.0)
+    else if (m > 0.0f)
         octant = 1;
-    else if (m > -1.0)
+    else if (m > -1.0f)
         octant = 8;
     else
         octant = 7;

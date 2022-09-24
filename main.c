@@ -2,26 +2,6 @@
 #include "TM4C123GH6PM.h"
 #include "tiva-gc.h"
 
-int main3()
-{
-    LCD_pixel bgColor;
-    LCD_Init();
-    LCD_CS(LOW);
-
-    bgColor = LCD_GetSettings().BGColor;
-    LCD_gClear();
-    LCD_gLine(64, 64, 90, 55, 1, LCD_MAGENTA);
-    LCD_gLine(64, 64, 90, 64, 2, LCD_RED);
-    LCD_gLine(64, 64, 90, 75, 3, LCD_YELLOW);
-    LCD_gLine(64, 64, 90, 90, 4, LCD_GREEN);
-    LCD_gLine(64, 64, 75, 90, 5, LCD_CYAN);
-    LCD_gLine(64, 64, 64, 90, 6, LCD_BLUE);
-    LCD_gLine(64, 64, 55, 90, 7, LCD_MAGENTA);
-
-
-    while(1);
-}
-
 int main()
 {
     LCD_Settings actSettings;
@@ -119,38 +99,17 @@ int main()
             // LCD_gFillRectangle((uint8_t) old_pos.x - 5, (uint8_t) old_pos.y - 5, 10, 10, actSettings.BGColor);
             LCD_gLine(64, 64, (uint8_t) old_pos.x, (uint8_t) old_pos.y, 1, actSettings.BGColor);
             // LCD_gTriangle((point) {old_pos.x, old_pos.y - 5}, (point) {old_pos.x + 5, old_pos.y + 5}, (point) {old_pos.x - 5, old_pos.y + 5}, 1, actSettings.BGColor);
-            LCD_gFillTriangle((point) {old_pos.x, old_pos.y - 5}, (point) {old_pos.x + 5, old_pos.y + 5}, (point) {old_pos.x - 5, old_pos.y + 5}, actSettings.BGColor);
-            // LCD_gPolygon(old_rhombus, 4, 1, actSettings.BGColor);
+            // LCD_gFillTriangle((point) {old_pos.x, old_pos.y - 5}, (point) {old_pos.x + 5, old_pos.y + 5}, (point) {old_pos.x - 5, old_pos.y + 5}, actSettings.BGColor);
+            LCD_gPolygon(old_rhombus, 4, 1, actSettings.BGColor);
             
             // Draw new shapes
             // LCD_gRectangle((uint8_t) pos.x - 5, (uint8_t) pos.y - 5, 10, 10, 1, colors[i]);
             LCD_gLine(64, 64, (uint8_t) pos.x, (uint8_t) pos.y, 1, colors[i]);
             // LCD_gTriangle((point) {pos.x, pos.y - 5}, (point) {pos.x + 5, pos.y + 5}, (point) {pos.x - 5, pos.y + 5}, 1, colors[i]);
-            LCD_gFillTriangle((point) {pos.x, pos.y - 5}, (point) {pos.x + 5, pos.y + 5}, (point) {pos.x - 5, pos.y + 5}, colors[i]);
-            // LCD_gPolygon(rhombus, 4, 1, colors[i]);
+            // LCD_gFillTriangle((point) {pos.x, pos.y - 5}, (point) {pos.x + 5, pos.y + 5}, (point) {pos.x - 5, pos.y + 5}, colors[i]);
+            LCD_gPolygon(rhombus, 4, 1, colors[i]);
 
             changeFlag = 0;
         }
-    }
-}
-
-int main0()
-{
-    uint32_t color = 0x3f000;
-    uint32_t counter = 0;
-    
-    LCD_Init();
-    
-    LCD_CS(LOW);
-    LCD_SetArea(0, 0, LCD_WIDTH - 1, LCD_HEIGHT - 1);
-    LCD_ActivateWrite();
-    while (1)
-    {
-        LCD_PushPixel(color >> 12 & 0xFF, (color >> 6) & 0xFF, color & 0xFF);
-        
-        color = 0;//(color >= 0x3FFFF) ? 0 : color + 32;
-        
-        if (++counter == LCD_HEIGHT * LCD_WIDTH)
-            counter = 0;
     }
 }

@@ -24,7 +24,10 @@ int ReadButtonRaw(int button)
 
 int ReadButton(int button)
 {
-    static uint8_t tsw1 = 0, tsw2 = 0, esw1 = 0, esw2 = 0, esel = 0;
+    #ifdef DISABLE_LCD
+    static uint8_t tsw1 = 0, tsw2 = 0;
+    #endif
+    static uint8_t esw1 = 0, esw2 = 0, esel = 0;
     uint8_t r = 0;
 
     // Read once, depending on read and state: wait, read again
