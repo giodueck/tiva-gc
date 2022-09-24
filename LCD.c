@@ -355,9 +355,6 @@ void LCD_gVLine(int16_t x, int16_t y1, int16_t y2, uint8_t stroke, LCD_pixel col
         y1 = y2;
         y2 = aux;
     }
-    
-    if (y1 == y2)
-        return;
 
     // Check that the line is inside the screen. If not, no point clipping it to the edge
     if (x - ((stroke - 1) >> 1) < 0 && x + (stroke >> 1) < 0 || x - ((stroke - 1) >> 1) > (LCD_WIDTH - 1) && x + (stroke >> 1) > (LCD_WIDTH - 1))
@@ -384,9 +381,6 @@ void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, LCD_pixel col
         x1 = x2;
         x2 = aux;
     }
-    
-    if (x1 == x2)
-        return;
     
     // Check that the line is inside the screen. If not, no point clipping it to the edge
     if (y - ((stroke - 1) >> 1) < 0 && y + (stroke >> 1) < 0 || y - ((stroke - 1) >> 1) > (LCD_HEIGHT - 1) && y + (stroke >> 1) > (LCD_HEIGHT - 1))
@@ -565,9 +559,101 @@ void LCD_gTriangle(point v1, point v2, point v3, uint8_t stroke, LCD_pixel color
     LCD_gLine(v3.x, v3.y, v1.x, v1.y, stroke, color);
 }
 
+// Filled Triangle
+//  Param:
+//      v1: first vertex
+//      v2: second vertex
+//      v3: third vertex
+//      color: LCD_pixel
 void LCD_gFillTriangle(point v1, point v2, point v3, LCD_pixel color)
 {
+    // Algorithm taken from https://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
+    // Note that in this function top is higher y, when in reality this is not necessarily the case.
+    // This does not matter though
 
+    point top_v, bottom_v, middle_v, aux_v;
+    float invslope1, invslope2;
+    float curx1, curx2;
+
+    // Sort points
+    if (v1.y < v2.y && v1.y < v3.y)
+    {
+        bottom_v = v1;
+        // cmp v2 v3 for top
+        if (v2.y > v3.y)
+        {
+            top_v = v2;
+            middle_v = v3;
+        } else
+        {
+            top_v = v3;
+            middle_v = v2;
+        }
+    } else if (v1.y > v2.y && v1.y > v3.y)
+    {
+        top_v = v1;
+        // cmp v2 v3 for bottom
+        if (v2.y < v3.y)
+        {
+            bottom_v = v2;
+            middle_v = v3;
+        } else
+        {
+            bottom_v = v3;
+            middle_v = v2;
+        }
+    } else
+    {
+        middle_v = v1;
+        // cmp v2 v3 for top and bottom
+        if (v2.y > v3.y)
+        {
+            top_v = v2;
+            bottom_v = v3;
+        } else
+        {
+            top_v = v3;
+            bottom_v = v2;
+        }
+    }
+
+    // auxiliary point to divide the triangle into 2 sections
+    aux_v.x = (int)(top_v.x + ((float)(middle_v.y - top_v.y) / (float)(bottom_v.y - top_v.y)) * (bottom_v.x - top_v.x));
+    aux_v.y = middle_v.y;
+
+    // Draw flat bottom triangle
+    if (middle_v.y - top_v.y != 0 && aux_v.y - top_v.y != 0)
+    {
+        invslope1 = (float) (middle_v.x - top_v.x) / (middle_v.y - top_v.y);
+        invslope2 = (float) (aux_v.x - top_v.x) / (aux_v.y - top_v.y);
+
+        curx1 = top_v.x;
+        curx2 = top_v.x;
+
+        for (int16_t scanlineY = top_v.y; scanlineY > middle_v.y; scanlineY--)
+        {
+            LCD_gHLine((int16_t) curx1, (int16_t) curx2, scanlineY, 1, color);
+            curx1 += invslope1;
+            curx2 += invslope2;
+        }
+    }
+
+    // Draw flat top triangle
+    if (bottom_v.y - middle_v.y != 0 && bottom_v.y - aux_v.y != 0)
+    {
+        invslope1 = (float) (bottom_v.x - middle_v.x) / (bottom_v.y - middle_v.y);
+        invslope2 = (float) (bottom_v.x - aux_v.x) / (bottom_v.y - aux_v.y);
+
+        curx1 = bottom_v.x;
+        curx2 = bottom_v.x;
+
+        for (int16_t scanlineY = bottom_v.y; scanlineY <= middle_v.y; scanlineY++)
+        {
+            LCD_gHLine((int16_t) curx1, (int16_t) curx2, scanlineY, 1, color);
+            curx1 -= invslope1;
+            curx2 -= invslope2;
+        }
+    }
 }
 
 // Arbitrary polygon outline

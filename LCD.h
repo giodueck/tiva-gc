@@ -158,6 +158,12 @@ void LCD_gFillRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, LCD_pixel co
 //      color: LCD_pixel
 void LCD_gRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, LCD_pixel color);
 
+// Filled Triangle
+//  Param:
+//      v1: first vertex
+//      v2: second vertex
+//      v3: third vertex
+//      color: LCD_pixel
 void LCD_gFillTriangle(point v1, point v2, point v3, LCD_pixel color);
 
 // Triangle outline
