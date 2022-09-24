@@ -452,32 +452,28 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, L
         for (y = y1; y <= y2 && y < LCD_HEIGHT; y++)
         {
             x = (y - y1) / m + x1;
-            if (y >= 0 && y < LCD_HEIGHT && x >= 0 && x < LCD_WIDTH)
-                LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
+            LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
         }
         break;
     case 1:
         for (x = x1; x <= x2 && x < LCD_WIDTH; x++)
         {
             y = m * (x - x1) + y1;
-            if (y >= 0 && y < LCD_HEIGHT && x >= 0 && x < LCD_WIDTH)
-                LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
+            LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
         }
         break;
     case 8:
         for (x = x1; x <= x2 && x < LCD_WIDTH; x++)
         {
             y = m * (x - x1) + y1;
-            if (y >= 0 && y < LCD_HEIGHT && x >= 0 && x < LCD_WIDTH)
-                LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
+            LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
         }
         break;
     case 7:
         for (y = y1; y >= y2 && y >= 0; y--)
         {
             x = (y - y1) / m + x1;
-            if (y >= 0 && y < LCD_HEIGHT && x >= 0 && x < LCD_WIDTH)
-                LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
+            LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
         }
         break;
     default:
@@ -671,4 +667,52 @@ void LCD_gPolygon(point *vertices, int n_vertices, uint8_t stroke, LCD_pixel col
         LCD_gLine(vertices[i].x, vertices[i].y, vertices[i + 1].x, vertices[i + 1].y, stroke, color);
     }
     LCD_gLine(vertices[i].x, vertices[i].y, vertices[0].x, vertices[0].y, stroke, color);
+}
+
+// Circle outline
+//  Param:
+//      x, y: circle center position
+//      r: circle radius
+//      stroke: outline width
+//      color: LCD_pixel
+void LCD_gCircle(int16_t x, int16_t y, float r, uint8_t stroke, LCD_pixel color)
+{
+    int16_t x_ = 1, y_ = r;
+    int16_t r2 = r * r;
+    int16_t res, res2;
+
+    if (r == 0)
+        return;
+    
+    // intersections with X and Y are easy using the radius
+    LCD_gDrawPixel(x + r, y, color.r, color.g, color.b);
+    LCD_gDrawPixel(x - r, y, color.r, color.g, color.b);
+    LCD_gDrawPixel(x, y + r, color.r, color.g, color.b);
+    LCD_gDrawPixel(x, y - r, color.r, color.g, color.b);
+
+    while (y_ / x_ >= 1)
+    {
+        // calculate next point, which will be down 1 pixel or on the same height
+        // see which one satisfies x^2 + y^2 >= r^2 and maximizes x^2 + y^2
+        // draw point, copy over to other octants, update x_ and y_
+        res = x_ * x_ + y_ * y_;
+        res2 = x_ * x_ + (y_ - 1) * (y_ - 1);
+        
+        if (res > r2 || res2 > res)
+        {
+            y_--;
+        }
+
+        LCD_gDrawPixel(x + x_, y - y_, color.r, color.g, color.b);
+        LCD_gDrawPixel(x - x_, y - y_, color.r, color.g, color.b);
+        LCD_gDrawPixel(x + x_, y + y_, color.r, color.g, color.b);
+        LCD_gDrawPixel(x - x_, y + y_, color.r, color.g, color.b);
+        LCD_gDrawPixel(x + y_, y - x_, color.r, color.g, color.b);
+        LCD_gDrawPixel(x - y_, y - x_, color.r, color.g, color.b);
+        LCD_gDrawPixel(x + y_, y + x_, color.r, color.g, color.b);
+        LCD_gDrawPixel(x - y_, y + x_, color.r, color.g, color.b);
+        x_++;
+    }
+
+    return;
 }

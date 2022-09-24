@@ -19,14 +19,16 @@ typedef struct LCD_pixel
     uint8_t r, g, b;
 } LCD_pixel;
 
-#define LCD_BLACK   (LCD_pixel) { 0x00, 0x00, 0x00 }
-#define LCD_WHITE   (LCD_pixel) { 0x3F, 0x3F, 0x3F }
-#define LCD_RED     (LCD_pixel) { 0x3F, 0x00, 0x00 }
-#define LCD_GREEN   (LCD_pixel) { 0x00, 0x3F, 0x00 }
-#define LCD_BLUE    (LCD_pixel) { 0x00, 0x00, 0x3F }
-#define LCD_YELLOW  (LCD_pixel) { 0x3F, 0x3F, 0x00 }
-#define LCD_MAGENTA (LCD_pixel) { 0x3F, 0x00, 0x3F }
-#define LCD_CYAN    (LCD_pixel) { 0x00, 0x3F, 0x3F }
+#define LCD_BLACK       (LCD_pixel) { 0x00, 0x00, 0x00 }
+#define LCD_DARK_GREY   (LCD_pixel) { 0x03, 0x03, 0x03 }
+#define LCD_GREY        (LCD_pixel) { 0x0F, 0x0F, 0x0F }
+#define LCD_WHITE       (LCD_pixel) { 0x3F, 0x3F, 0x3F }
+#define LCD_RED         (LCD_pixel) { 0x3F, 0x00, 0x00 }
+#define LCD_GREEN       (LCD_pixel) { 0x00, 0x3F, 0x00 }
+#define LCD_BLUE        (LCD_pixel) { 0x00, 0x00, 0x3F }
+#define LCD_YELLOW      (LCD_pixel) { 0x3F, 0x3F, 0x00 }
+#define LCD_MAGENTA     (LCD_pixel) { 0x3F, 0x00, 0x3F }
+#define LCD_CYAN        (LCD_pixel) { 0x00, 0x3F, 0x3F }
 
 typedef struct LCD_Settings
 {
@@ -184,9 +186,15 @@ void LCD_gTriangle(point v1, point v2, point v3, uint8_t stroke, LCD_pixel color
 //      color: LCD_pixel
 void LCD_gPolygon(point *vertices, int n_vertices, uint8_t stroke, LCD_pixel color);
 
-void LCD_gFillCircle(int16_t x, int16_t y, uint8_t radius, LCD_pixel color);
+void LCD_gFillCircle(int16_t x, int16_t y, float r, LCD_pixel color);
 
-void LCD_gCircle(int16_t x, int16_t y, uint8_t radius, uint8_t stroke, LCD_pixel color);
+// Circle outline
+//  Param:
+//      x, y: circle center position
+//      r: circle radius
+//      stroke: outline width
+//      color: LCD_pixel
+void LCD_gCircle(int16_t x, int16_t y, float r, uint8_t stroke, LCD_pixel color);
 
 void LCD_gText(int16_t x, int16_t y, LCD_pixel color);
 
