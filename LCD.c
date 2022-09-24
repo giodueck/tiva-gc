@@ -569,3 +569,20 @@ void LCD_gFillTriangle(point v1, point v2, point v3, LCD_pixel color)
 {
 
 }
+
+// Arbitrary polygon outline
+// Edges are drawn in order from the first to the last and back to the first
+//  Param:
+//      vertices: array of vertices
+//      n_vertices: size of vertices array
+//      stroke: edge width
+//      color: LCD_pixel
+void LCD_gPolygon(point *vertices, int n_vertices, uint8_t stroke, LCD_pixel color)
+{
+    int i;
+    for (i = 0; i < n_vertices - 1; i++)
+    {
+        LCD_gLine(vertices[i].x, vertices[i].y, vertices[i + 1].x, vertices[i + 1].y, stroke, color);
+    }
+    LCD_gLine(vertices[i].x, vertices[i].y, vertices[0].x, vertices[0].y, stroke, color);
+}

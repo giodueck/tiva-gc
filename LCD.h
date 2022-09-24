@@ -169,6 +169,15 @@ void LCD_gFillTriangle(point v1, point v2, point v3, LCD_pixel color);
 //      color: LCD_pixel
 void LCD_gTriangle(point v1, point v2, point v3, uint8_t stroke, LCD_pixel color);
 
+// Arbitrary polygon outline
+// Edges are drawn in order from the first to the last and back to the first
+//  Param:
+//      vertices: array of vertices
+//      n_vertices: size of vertices array
+//      stroke: edge width
+//      color: LCD_pixel
+void LCD_gPolygon(point *vertices, int n_vertices, uint8_t stroke, LCD_pixel color);
+
 void LCD_gFillCircle(int16_t x, int16_t y, uint8_t radius, LCD_pixel color);
 
 void LCD_gCircle(int16_t x, int16_t y, uint8_t radius, uint8_t stroke, LCD_pixel color);

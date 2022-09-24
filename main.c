@@ -29,6 +29,7 @@ int main()
     LCD_pixel colors[6] = { LCD_RED, LCD_YELLOW, LCD_GREEN, LCD_CYAN, LCD_BLUE, LCD_MAGENTA };
     uint8_t i = 0, changeFlag = 0;
     uint8_t h = 10, w = 10;
+    point old_rhombus[4] = {0}, rhombus[4] = {0};
     
     // Input init
     InitGPIO_EdumkiiButtons();
@@ -52,6 +53,15 @@ int main()
         pos.y += 2;
     else if (pos.y >= LCD_HEIGHT)
         pos.y = LCD_HEIGHT - 1;
+
+    rhombus[0] = pos;
+    rhombus[0].y -= 5;
+    rhombus[1] = pos;
+    rhombus[1].x += 5;
+    rhombus[2] = pos;
+    rhombus[2].y += 5;
+    rhombus[3] = pos;
+    rhombus[3].x -= 5;
 
     LCD_gClear();
 
@@ -90,6 +100,18 @@ int main()
             pos.y += 2;
         else if (pos.y >= LCD_HEIGHT)
             pos.y = LCD_HEIGHT - 1;
+        
+        for (int j = 0; j < 4; j++)
+            old_rhombus[j] = rhombus[j];
+
+        rhombus[0] = pos;
+        rhombus[0].y -= 5;
+        rhombus[1] = pos;
+        rhombus[1].x += 5;
+        rhombus[2] = pos;
+        rhombus[2].y += 5;
+        rhombus[3] = pos;
+        rhombus[3].x -= 5;
 
         // Dibuja sobre el display
         if (old_pos.x != pos.x || old_pos.y != pos.y || changeFlag)
@@ -97,12 +119,14 @@ int main()
             // Erase previous shapes
             // LCD_gFillRectangle((uint8_t) old_pos.x - 5, (uint8_t) old_pos.y - 5, 10, 10, actSettings.BGColor);
             LCD_gLine(64, 64, (uint8_t) old_pos.x, (uint8_t) old_pos.y, 3, actSettings.BGColor);
-            LCD_gTriangle((point) {old_pos.x, old_pos.y - 5}, (point) {old_pos.x + 5, old_pos.y + 5}, (point) {old_pos.x - 5, old_pos.y + 5}, 1, actSettings.BGColor);
+            // LCD_gTriangle((point) {old_pos.x, old_pos.y - 5}, (point) {old_pos.x + 5, old_pos.y + 5}, (point) {old_pos.x - 5, old_pos.y + 5}, 1, actSettings.BGColor);
+            LCD_gPolygon(old_rhombus, 4, 1, actSettings.BGColor);
             
             // Draw new shapes
-            LCD_gTriangle((point) {pos.x, pos.y - 5}, (point) {pos.x + 5, pos.y + 5}, (point) {pos.x - 5, pos.y + 5}, 1, colors[i]);
-            LCD_gLine(64, 64, (uint8_t) pos.x, (uint8_t) pos.y, 3, colors[i]);
             // LCD_gRectangle((uint8_t) pos.x - 5, (uint8_t) pos.y - 5, 10, 10, 1, colors[i]);
+            LCD_gLine(64, 64, (uint8_t) pos.x, (uint8_t) pos.y, 3, colors[i]);
+            // LCD_gTriangle((point) {pos.x, pos.y - 5}, (point) {pos.x + 5, pos.y + 5}, (point) {pos.x - 5, pos.y + 5}, 1, colors[i]);
+            LCD_gPolygon(rhombus, 4, 1, colors[i]);
 
             changeFlag = 0;
         }
