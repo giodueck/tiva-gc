@@ -455,7 +455,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, L
     switch (octant)
     {
     case 2:
-        for (y = y1; y < y2 && y < LCD_HEIGHT; y++)
+        for (y = y1; y <= y2 && y < LCD_HEIGHT; y++)
         {
             x = (y - y1) / m + x1;
             if (y >= 0 && y < LCD_HEIGHT && x >= 0 && x < LCD_WIDTH)
@@ -463,7 +463,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, L
         }
         break;
     case 1:
-        for (x = x1; x < x2 && x < LCD_WIDTH; x++)
+        for (x = x1; x <= x2 && x < LCD_WIDTH; x++)
         {
             y = m * (x - x1) + y1;
             if (y >= 0 && y < LCD_HEIGHT && x >= 0 && x < LCD_WIDTH)
@@ -471,7 +471,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, L
         }
         break;
     case 8:
-        for (x = x1; x < x2 && x < LCD_WIDTH; x++)
+        for (x = x1; x <= x2 && x < LCD_WIDTH; x++)
         {
             y = m * (x - x1) + y1;
             if (y >= 0 && y < LCD_HEIGHT && x >= 0 && x < LCD_WIDTH)
@@ -479,7 +479,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, L
         }
         break;
     case 7:
-        for (y = y1; y > y2 && y >= 0; y--)
+        for (y = y1; y >= y2 && y >= 0; y--)
         {
             x = (y - y1) / m + x1;
             if (y >= 0 && y < LCD_HEIGHT && x >= 0 && x < LCD_WIDTH)
@@ -493,7 +493,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, L
     // 3. If stroke is not complete, define shift in position for next line
     if (stroke > 1)
     {
-        for (int i = - ((stroke - 1) >> 1); i < (stroke >> 1); i++)
+        for (int i = - (stroke >> 1); i < ((stroke - 1) >> 1); i++)
         {
             // original line is already drawn
             if (i == 0)
