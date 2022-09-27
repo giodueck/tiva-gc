@@ -442,7 +442,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, L
     else
         octant = 7;
     
-    // 2. Bresenham in a buffer
+    // 2. Bresenham's
     x = x1;
     y = y1;
 
@@ -678,7 +678,7 @@ void LCD_gPolygon(point *vertices, int n_vertices, uint8_t stroke, LCD_pixel col
 void LCD_gCircle(int16_t x, int16_t y, float r, uint8_t stroke, LCD_pixel color)
 {
     int16_t x_ = 1, y_ = r;
-    int16_t r2 = r * r;
+    int16_t r2 = r * r + 1;
     int16_t res, res2;
 
     if (r == 0)
@@ -715,4 +715,53 @@ void LCD_gCircle(int16_t x, int16_t y, float r, uint8_t stroke, LCD_pixel color)
     }
 
     return;
+}
+
+// Filled cricle
+//  Param:
+//      x, y: circle center position
+//      r: circle radius
+//      color: LCD_pixel
+void LCD_gFillCircle(int16_t x, int16_t y, float r, LCD_pixel color)
+{
+    int16_t x_ = 1, y_ = r;
+    int16_t r2 = r * r + 1;
+    int16_t res, res2;
+
+    if (r == 0)
+        return;
+    
+    // intersections with X and Y are easy using the radius
+    LCD_gHLine(x - r, x + r, y, 1, color);
+    LCD_gDrawPixel(x, y + r, color.r, color.g, color.b);
+    LCD_gDrawPixel(x, y - r, color.r, color.g, color.b);
+
+    while (y_ / x_ >= 1)
+    {
+        // calculate next point, which will be down 1 pixel or on the same height
+        // see which one satisfies x^2 + y^2 >= r^2 and maximizes x^2 + y^2
+        // draw point, copy over to other octants, update x_ and y_
+        res = x_ * x_ + y_ * y_;
+        res2 = x_ * x_ + (y_ - 1) * (y_ - 1);
+        
+        // Lines only need to be drawn once for some octants, single pixels can be drawn if y_ does not change
+        if (res > r2 || res2 > res)
+        {
+            y_--;
+
+            LCD_gHLine(x - x_, x + x_, y - y_, 1, color);
+            LCD_gHLine(x - x_, x + x_, y + y_, 1, color);
+        } else
+        {
+            LCD_gDrawPixel(x + x_, y - y_, color.r, color.g, color.b);
+            LCD_gDrawPixel(x - x_, y - y_, color.r, color.g, color.b);
+            LCD_gDrawPixel(x + x_, y + y_, color.r, color.g, color.b);
+            LCD_gDrawPixel(x - x_, y + y_, color.r, color.g, color.b);
+        }
+
+        LCD_gHLine(x - y_, x + y_, y - x_, 1, color);
+        LCD_gHLine(x - y_, x + y_, y + x_, 1, color);
+
+        x_++;
+    }
 }

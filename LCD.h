@@ -186,6 +186,11 @@ void LCD_gTriangle(point v1, point v2, point v3, uint8_t stroke, LCD_pixel color
 //      color: LCD_pixel
 void LCD_gPolygon(point *vertices, int n_vertices, uint8_t stroke, LCD_pixel color);
 
+// Filled cricle
+//  Param:
+//      x, y: circle center position
+//      r: circle radius
+//      color: LCD_pixel
 void LCD_gFillCircle(int16_t x, int16_t y, float r, LCD_pixel color);
 
 // Circle outline

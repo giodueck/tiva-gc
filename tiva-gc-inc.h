@@ -5,7 +5,7 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define abs(a)    ((a) < 0 ? -(a) : (a))
 
-typedef struct
+typedef struct point
 {
     int32_t x, y;
 } point;

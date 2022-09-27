@@ -8,7 +8,7 @@ int main()
     point old_pos, pos, js = { 2048, 2048 };    // Joystick centered to begin with
     LCD_pixel colors[6] = { LCD_RED, LCD_YELLOW, LCD_GREEN, LCD_CYAN, LCD_BLUE, LCD_MAGENTA };
     uint8_t i = 0, changeFlag = 0;
-    point old_rhombus[4] = {0}, rhombus[4] = {0};
+    point old_rhombus[4], rhombus[4];
     
     // Input init
     InitGPIO_EdumkiiButtons();
@@ -18,7 +18,7 @@ int main()
     LCD_Init();
     LCD_CS(LOW);
     
-    LCD_SetBGColor(LCD_GREY);
+    LCD_SetBGColor(LCD_BLACK);
     actSettings = LCD_GetSettings();
     js = ReadJoystick(js);    // don't need that much precision
     js.x = js.x;
@@ -26,22 +26,22 @@ int main()
     pos.x = (int32_t)(js.x / 4095.0f * LCD_WIDTH);
     pos.y = LCD_HEIGHT - (int32_t)(js.y / 4095.0f * LCD_HEIGHT);
     if (pos.x < 2)
-        pos.x += 2;
+        pos.x = 2;
     else if (pos.x >= LCD_WIDTH)
         pos.x = LCD_WIDTH - 1;
     if (pos.y < 2)
-        pos.y += 2;
+        pos.y = 2;
     else if (pos.y >= LCD_HEIGHT)
         pos.y = LCD_HEIGHT - 1;
 
-    rhombus[0] = pos;
-    rhombus[0].y -= 5;
-    rhombus[1] = pos;
-    rhombus[1].x += 5;
-    rhombus[2] = pos;
-    rhombus[2].y += 5;
-    rhombus[3] = pos;
-    rhombus[3].x -= 5;
+    // rhombus[0].x = pos.x;
+    // rhombus[0].y = max(0, pos.y - 5);
+    // rhombus[1].x = min(LCD_WIDTH, pos.x + 5);
+    // rhombus[1].y = pos.y;
+    // rhombus[2].x = pos.x;
+    // rhombus[2].y = min(LCD_HEIGHT, pos.y + 5);
+    // rhombus[3].x = max(0, pos.x - 5);
+    // rhombus[3].y = pos.y;
 
     LCD_gClear();
 
@@ -73,25 +73,25 @@ int main()
         pos.x = (int32_t)(js.x / 4095.0f * LCD_WIDTH);
         pos.y = LCD_HEIGHT - (int32_t)(js.y / 4095.0f * LCD_HEIGHT);
         if (pos.x < 2)
-            pos.x += 2;
+            pos.x = 2;
         else if (pos.x >= LCD_WIDTH)
             pos.x = LCD_WIDTH - 1;
         if (pos.y < 2)
-            pos.y += 2;
+            pos.y = 2;
         else if (pos.y >= LCD_HEIGHT)
             pos.y = LCD_HEIGHT - 1;
         
-        for (int j = 0; j < 4; j++)
-            old_rhombus[j] = rhombus[j];
+        // for (int j = 0; j < 4; j++)
+        //     old_rhombus[j] = rhombus[j];
 
-        rhombus[0] = pos;
-        rhombus[0].y -= 5;
-        rhombus[1] = pos;
-        rhombus[1].x += 5;
-        rhombus[2] = pos;
-        rhombus[2].y += 5;
-        rhombus[3] = pos;
-        rhombus[3].x -= 5;
+        // rhombus[0].x = pos.x;
+        // rhombus[0].y = max(0, pos.y - 5);
+        // rhombus[1].x = min(LCD_WIDTH, pos.x + 5);
+        // rhombus[1].y = pos.y;
+        // rhombus[2].x = pos.x;
+        // rhombus[2].y = min(LCD_HEIGHT, pos.y + 5);
+        // rhombus[3].x = max(0, pos.x - 5);
+        // rhombus[3].y = pos.y;
 
         // Dibuja sobre el display
         if (old_pos.x != pos.x || old_pos.y != pos.y || changeFlag)
@@ -103,6 +103,7 @@ int main()
             // LCD_gFillTriangle((point) {old_pos.x, old_pos.y - 5}, (point) {old_pos.x + 5, old_pos.y + 5}, (point) {old_pos.x - 5, old_pos.y + 5}, actSettings.BGColor);
             // LCD_gPolygon(old_rhombus, 4, 1, actSettings.BGColor);
             LCD_gCircle(old_pos.x, old_pos.y, 7, 1, actSettings.BGColor);
+            // LCD_gFillCircle(old_pos.x, old_pos.y, 7, actSettings.BGColor);
             
             // Draw new shapes
             // LCD_gRectangle((uint8_t) pos.x - 5, (uint8_t) pos.y - 5, 10, 10, 1, colors[i]);
@@ -111,6 +112,7 @@ int main()
             // LCD_gFillTriangle((point) {pos.x, pos.y - 5}, (point) {pos.x + 5, pos.y + 5}, (point) {pos.x - 5, pos.y + 5}, colors[i]);
             // LCD_gPolygon(rhombus, 4, 1, colors[i]);
             LCD_gCircle(pos.x, pos.y, 7, 1, colors[i]);
+            // LCD_gFillCircle(pos.x, pos.y, 7, colors[i]);
 
             changeFlag = 0;
         }
