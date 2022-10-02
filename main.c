@@ -4,7 +4,8 @@
 
 int main()
 {
-    textdemo();
+    // textdemo();
+    graphicsdemo();
 }
 
 int textdemo()
@@ -50,11 +51,11 @@ int textdemo()
 
     while (1)
     {
-        if (ReadButton(BUTTON_EDUMKII_SW1))
+        if (Input_ReadButton(BUTTON_EDUMKII_SW1))
         {
             enable = !enable;
         }
-        if (ReadButton(BUTTON_EDUMKII_SW2))
+        if (Input_ReadButton(BUTTON_EDUMKII_SW2))
         {
             LCD_gClear();
             LCD_gString(3, 4, "Hello! :)", colors[color]);
@@ -64,7 +65,7 @@ int textdemo()
             y = 0;
             c = 0;
         }
-        if (ReadButton(BUTTON_EDUMKII_SEL))
+        if (Input_ReadButton(BUTTON_EDUMKII_SEL))
         {
             color++;
             if (color == 21) color = 0;
@@ -104,7 +105,7 @@ int graphicsdemo()
     
     LCD_SetBGColor(LCD_BLACK);
     actSettings = LCD_GetSettings();
-    js = ReadJoystick(js);    // don't need that much precision
+    js = Input_ReadJoystick();    // don't need that much precision
     js.x = js.x;
     js.y = js.y;
     pos.x = (int32_t)(js.x / 4095.0f * LCD_WIDTH);
@@ -132,17 +133,17 @@ int graphicsdemo()
     while (1)
     {
         // Detecta pulsaciones de los botones
-        if (ReadButton(BUTTON_EDUMKII_SW1))
+        if (Input_ReadButton(BUTTON_EDUMKII_SW1))
         {
             i = (i + 1) % 6;    // Cycle through primary and secondary RGB colors
             changeFlag = 1;
         }
-        if (ReadButton(BUTTON_EDUMKII_SW2))
+        if (Input_ReadButton(BUTTON_EDUMKII_SW2))
         {
             i = (i + 5) % 6;
             changeFlag = 1;
         }
-        if (ReadButton(BUTTON_EDUMKII_SEL))
+        if (Input_ReadButton(BUTTON_EDUMKII_SEL))
         {
             LCD_SetInversion(!actSettings.InversionMode);
             actSettings.InversionMode = !actSettings.InversionMode;
@@ -151,7 +152,7 @@ int graphicsdemo()
 
         // Detecta la posicion del joystick y la convierte a un punto en el display
         old_pos = pos;
-        js = ReadJoystick(js);
+        js = Input_ReadJoystick();
         js.x = js.x;
         js.y = js.y;
         pos.x = (int32_t)(js.x / 4095.0f * LCD_WIDTH);

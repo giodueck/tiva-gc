@@ -5,6 +5,11 @@
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define abs(a)    ((a) < 0 ? -(a) : (a))
 
+#define HIGH 1
+#define LOW  0
+#define ON   1
+#define OFF  0
+
 typedef struct point
 {
     int32_t x, y;

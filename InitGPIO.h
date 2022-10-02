@@ -1,6 +1,10 @@
 #ifndef INITGPIO_H
 #define INITGPIO_H
 
+/*
+    GPIO initializations for the buttons, joystick, and other devices, except for the LCD.
+*/
+
 #include <stdint.h>
 
 // SW1: PF4

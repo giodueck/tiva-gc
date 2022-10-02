@@ -1,7 +1,12 @@
 #include "Input.h"
 #include "delay.h"
 
-int ReadButtonRaw(int button)
+// Reads a button.
+//  Param:
+//      button: one of BUTTON_EDUMKII_SW1, BUTTON_EDUMKII_SW2, BUTTON_EDUMKII_SEL
+//  Return:
+//      0 if the button was not closed, 1 if it was
+int Input_ReadButtonRaw(int button)
 {
     switch (button)
     {
@@ -22,7 +27,12 @@ int ReadButtonRaw(int button)
     }
 }
 
-int ReadButton(int button)
+// Reads a button and returns 1 if the button was pressed since the last call.
+//  Param:
+//      button: one of BUTTON_EDUMKII_SW1, BUTTON_EDUMKII_SW2, BUTTON_EDUMKII_SEL
+//  Return:
+//      0 if the button was not pressed or was not released since the last press, 1 otherwise
+int Input_ReadButton(int button)
 {
     #ifdef DISABLE_LCD
     static uint8_t tsw1 = 0, tsw2 = 0;
@@ -38,58 +48,58 @@ int ReadButton(int button)
     {
         #ifdef DISABLE_LCD
         case BUTTON_TIVAC_SW1:
-            r = ReadButtonRaw(button);
+            r = Input_ReadButtonRaw(button);
             if (!r)
                 tsw1 = 0;
             else if (!tsw1)
             {
                 delay(10);
-                tsw1 = ReadButtonRaw(button);
+                tsw1 = Input_ReadButtonRaw(button);
                 return tsw1;
             }
             break;
         case BUTTON_TIVAC_SW2:
-            r = ReadButtonRaw(button);
+            r = Input_ReadButtonRaw(button);
             if (!r)
                 tsw2 = 0;
             else if (!tsw2)
             {
                 delay(10);
-                tsw2 = ReadButtonRaw(button);
+                tsw2 = Input_ReadButtonRaw(button);
                 return tsw2;
             }
             break;
         #endif
         case BUTTON_EDUMKII_SW1:
-            r = ReadButtonRaw(button);
+            r = Input_ReadButtonRaw(button);
             if (!r)
                 esw1 = 0;
             else if (!esw1)
             {
                 delay(10);
-                esw1 = ReadButtonRaw(button);
+                esw1 = Input_ReadButtonRaw(button);
                 return esw1;
             }
             break;
         case BUTTON_EDUMKII_SW2:
-            r = ReadButtonRaw(button);
+            r = Input_ReadButtonRaw(button);
             if (!r)
                 esw2 = 0;
             else if (!esw2)
             {
                 delay(10);
-                esw2 = ReadButtonRaw(button);
+                esw2 = Input_ReadButtonRaw(button);
                 return esw2;
             }
             break;
         case BUTTON_EDUMKII_SEL:
-            r = ReadButtonRaw(button);
+            r = Input_ReadButtonRaw(button);
             if (!r)
                 esel = 0;
             else if (!esel)
             {
                 delay(10);
-                esel = ReadButtonRaw(button);
+                esel = Input_ReadButtonRaw(button);
                 return esel;
             }
             break;
@@ -100,7 +110,10 @@ int ReadButton(int button)
     return 0;
 }
 
-point ReadJoystickRaw(void)
+// Reads the value given by the current joystick position.
+//  Return:
+//      point describing the position of the joystick, 0-4095
+point Input_ReadJoystickRaw(void)
 {
     point p;
     
@@ -119,11 +132,21 @@ point ReadJoystickRaw(void)
     return p;
 }
 
-point ReadJoystick(point old)
+// Reads the position of the joystick and compares it against the previous value.
+// If the value changes about 1 pixel in any direction, the value returned is the value
+// given by Input_ReadJoystickRaw, otherwise any change is assumed to be noise and
+// the old value is returned
+//  Return:
+//      point describing the position of the joystick, 0-4095
+point Input_ReadJoystick()
 {
-    point new = ReadJoystickRaw();
-    if (abs(old.x - new.x) < 32 && abs(old.y - new.y) < 32)   // check for a change of about 0.78% (~1 pixel) in either axis
+    static point old;
+    point new = Input_ReadJoystickRaw();
+    if (abs(old.x - new.x) < 31 && abs(old.y - new.y) < 31)   // check for a change of about 0.76% (~1 pixel) in either axis
         return old;
     else
+    {
+        old = new;
         return new;
+    }
 }

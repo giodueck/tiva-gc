@@ -4,11 +4,6 @@
 #include <stdint.h>
 #include "tiva-gc-inc.h"
 
-#define HIGH 1
-#define LOW  0
-#define ON   1
-#define OFF  0
-
 #define LCD_HEIGHT 132
 #define LCD_WIDTH  132
 
@@ -24,6 +19,7 @@ typedef struct LCD_pixel
 #define LCD_GREY        (LCD_pixel) { 0x20, 0x20, 0x20 }
 #define LCD_LIGHT_GREY  (LCD_pixel) { 0x30, 0x30, 0x30 }
 #define LCD_WHITE       (LCD_pixel) { 0x3F, 0x3F, 0x3F }
+
 #define LCD_RED         (LCD_pixel) { 0x3F, 0x00, 0x00 }
 #define LCD_GREEN       (LCD_pixel) { 0x00, 0x3F, 0x00 }
 #define LCD_BLUE        (LCD_pixel) { 0x00, 0x00, 0x3F }

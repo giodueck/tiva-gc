@@ -5,9 +5,8 @@
 //   Project includes
 // --------------------
 
-#include "InitGPIO.h"
+#include "tiva-ge.h"
 #include "LCD.h"
-#include "Input.h"
 #include "delay.h"
 
 // ---------------------------
