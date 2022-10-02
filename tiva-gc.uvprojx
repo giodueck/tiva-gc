@@ -444,6 +444,16 @@
               <FileType>5</FileType>
               <FilePath>.\tiva-gc-inc.h</FilePath>
             </File>
+            <File>
+              <FileName>tiva-ge.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\tiva-ge.c</FilePath>
+            </File>
+            <File>
+              <FileName>tiva-ge.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\tiva-ge.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

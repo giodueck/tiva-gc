@@ -10,6 +10,8 @@
 #define ON   1
 #define OFF  0
 
+#define NULL ((void *)0)
+
 typedef struct point
 {
     int32_t x, y;

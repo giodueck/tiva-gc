@@ -3,6 +3,9 @@
 GE_Button SW1 = {0}, SW2 = {0}, SEL = {0};
 GE_Joystick JS = {0};
 
+static void (*_mainMenu)(void) = NULL;
+static int (*_update)(float elapsedTime) = NULL;
+
 void GE_Input(void);
 
 // Performs input and screen initializations and clears screen to black.
@@ -44,9 +47,9 @@ void GE_Input(void)
 // it is the function responsible for setting which game will be run.
 //  Param:
 //      func: pointer to void function
-void GE_SetMainMenu(void (*func))
+void GE_SetMainMenu(void (*func)(void))
 {
-
+    _mainMenu = func;
 }
 
 // Set update function/game
@@ -59,11 +62,38 @@ void GE_SetMainMenu(void (*func))
 //      func: pointer to function taking one float parameter and returning int
 void GE_SetUpdate(int (*func)(float elapsed_time))
 {
-
+    _update = func;
 }
 
-// Runs the main gameloop
+// Runs the main menu and gameloop
 void GE_Loop(void)
 {
+    LCD_SetBGColor(LCD_BLACK);
+    LCD_gClear();
+
+    // Checks for menus or games set
+    if (!_mainMenu && !_update)
+    {
+        LCD_gString(0, 0, "E: No main menu", LCD_RED);
+        LCD_gString(3, 1, "function set!", LCD_RED);
+        while (1);
+    }
+
+    // Main program loop
+    while (1)
+    {
+        // Menu
+        while (!_update)
+        {
+            _mainMenu();
+        }
+
+        // Gameloop
+        while (_update)
+        {
+            if (!_update(0.0f))
+                _update = NULL;
+        }
+    }
 
 }

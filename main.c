@@ -5,7 +5,53 @@
 int main()
 {
     // textdemo();
-    graphicsdemo();
+    // graphicsdemo();
+    GEdemo();
+}
+
+void GEdemoMenu()
+{
+    LCD_pixel colors[21] = {
+        LCD_DARK_GREY,
+        LCD_GREY,
+        LCD_LIGHT_GREY,
+        LCD_WHITE,
+        LCD_RED,
+        LCD_GREEN,
+        LCD_BLUE,
+        LCD_YELLOW,
+        LCD_MAGENTA,
+        LCD_CYAN,
+        LCD_DARK_RED,
+        LCD_DARK_GREEN,
+        LCD_DARK_BLUE,
+        LCD_DARK_YELLOW,
+        LCD_PURPLE,
+        LCD_TEAL,
+        LCD_BROWN,
+        LCD_PINK,
+        LCD_TURQUOISE,
+        LCD_ORANGE,
+        LCD_GOLD
+    };
+    static uint8_t color = 0;
+
+    LCD_SetBGColor(colors[color]);
+    LCD_gString(0, 0, "Inside menu loop", LCD_GREEN);
+    LCD_gChar(0, 8, color, LCD_MAGENTA, colors[color], 2);
+
+    color++;
+    if (color == 21) color = 0;
+    delay(250);
+}
+
+int GEdemo()
+{
+    GE_Setup();
+
+    GE_SetMainMenu(GEdemoMenu);
+    
+    GE_Loop();
 }
 
 int textdemo()
@@ -83,7 +129,7 @@ int textdemo()
             x += 6;
         if (y - 8 >= LCD_HEIGHT)
             y = 0;
-        LCD_gChar(x + 3, y + 3, c, colors[color], LCD_BLACK, 1);
+        LCD_gChar(x, y, c, colors[color], LCD_BLACK, 1);
     }
 }
 

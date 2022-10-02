@@ -1052,7 +1052,8 @@ void LCD_gChar(int16_t x, int16_t y, char c, LCD_pixel textColor, LCD_pixel bgCo
         return;
     }
 
-    LCD_SetArea(x, y, x + 6 * size - 1, y + 8 * size - 1);
+    // + 3 accounts for the space in the memory buffer that is offscreen
+    LCD_SetArea(x + 3, y + 3, x + 6 * size - 1 + 3, y + 8 * size - 1 + 3);
     LCD_ActivateWrite();
 
     line = 0x01;    // print top row first
@@ -1112,9 +1113,9 @@ void LCD_gCharT(int16_t x, int16_t y, char c, LCD_pixel textColor, uint8_t size)
             if (line & 0x01)
             {
                 if (size == 1)
-                    LCD_gDrawPixel((uint8_t) x + i, (uint8_t) y + j, textColor.r, textColor.g, textColor.b);
+                    LCD_gDrawPixel((uint8_t) x + i + 3, (uint8_t) y + j + 3, textColor.r, textColor.g, textColor.b);
                 else
-                    LCD_gFillRectangle(x, y, i * size, j * size, textColor);
+                    LCD_gFillRectangle(x + 3, y + 3, i * size, j * size, textColor);
             }
         }
     }

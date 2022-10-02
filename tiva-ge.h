@@ -38,7 +38,7 @@ void GE_Setup(void);
 // it is the function responsible for setting which game will be run.
 //  Param:
 //      func: pointer to void function
-void GE_SetMainMenu(void (*func));
+void GE_SetMainMenu(void (*func)(void));
 
 // Set update function/game
 // The logic for the game must be in a function to be looped by the game engine.
