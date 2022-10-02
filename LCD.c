@@ -591,9 +591,9 @@ void LCD_PushPixel(uint8_t red, uint8_t green, uint8_t blue)
 LCD_pixel LCD_Ui32ToPixel(uint32_t p)
 {
     LCD_pixel pixel;
-    pixel.r = (uint8_t)((float)(p & 0xFF0000 >> 16) / 0xFF * 0x3F);
-    pixel.g = (uint8_t)((float)(p & 0xFF00 >> 8) / 0xFF * 0x3F);
-    pixel.b = (uint8_t)((float)(p & 0xFF) / 0xFF * 0x3F);
+    pixel.r = ((p >> 16) & 0xFF) >> 2;
+    pixel.g = ((p >> 8) & 0xFF) >> 2;
+    pixel.b = (p & 0xFF) >> 2;
     return pixel;
 }
 

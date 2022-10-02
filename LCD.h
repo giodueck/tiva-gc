@@ -20,8 +20,9 @@ typedef struct LCD_pixel
 } LCD_pixel;
 
 #define LCD_BLACK       (LCD_pixel) { 0x00, 0x00, 0x00 }
-#define LCD_DARK_GREY   (LCD_pixel) { 0x03, 0x03, 0x03 }
-#define LCD_GREY        (LCD_pixel) { 0x0F, 0x0F, 0x0F }
+#define LCD_DARK_GREY   (LCD_pixel) { 0x1A, 0x1A, 0x1A }
+#define LCD_GREY        (LCD_pixel) { 0x20, 0x20, 0x20 }
+#define LCD_LIGHT_GREY  (LCD_pixel) { 0x30, 0x30, 0x30 }
 #define LCD_WHITE       (LCD_pixel) { 0x3F, 0x3F, 0x3F }
 #define LCD_RED         (LCD_pixel) { 0x3F, 0x00, 0x00 }
 #define LCD_GREEN       (LCD_pixel) { 0x00, 0x3F, 0x00 }
@@ -29,6 +30,19 @@ typedef struct LCD_pixel
 #define LCD_YELLOW      (LCD_pixel) { 0x3F, 0x3F, 0x00 }
 #define LCD_MAGENTA     (LCD_pixel) { 0x3F, 0x00, 0x3F }
 #define LCD_CYAN        (LCD_pixel) { 0x00, 0x3F, 0x3F }
+
+#define LCD_DARK_RED    (LCD_pixel) { 0x1F, 0x00, 0x00 }
+#define LCD_DARK_GREEN  (LCD_pixel) { 0x00, 0x1F, 0x00 }
+#define LCD_DARK_BLUE   (LCD_pixel) { 0x00, 0x00, 0x1F }
+#define LCD_DARK_YELLOW (LCD_pixel) { 0x1F, 0x1F, 0x00 }
+#define LCD_PURPLE      (LCD_pixel) { 0x1F, 0x00, 0x1F }
+#define LCD_TEAL        (LCD_pixel) { 0x00, 0x1F, 0x1F }
+
+#define LCD_BROWN       (LCD_pixel) { 0x22, 0x11, 0x04 }
+#define LCD_PINK        (LCD_pixel) { 0xFF, 0x05, 0x24 }
+#define LCD_TURQUOISE   (LCD_pixel) { 0x10, 0x38, 0x34 }
+#define LCD_ORANGE      (LCD_pixel) { 0x3f, 0x11, 0x00 }
+#define LCD_GOLD        (LCD_pixel) { 0x3f, 0x29, 0x00 }
 
 typedef struct LCD_Settings
 {

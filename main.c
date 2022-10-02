@@ -12,6 +12,30 @@ int textdemo()
     char c = 0;
     uint8_t x = 0, y = 0;
     char enable = 1;
+    LCD_pixel colors[21] = {
+        LCD_DARK_GREY,
+        LCD_GREY,
+        LCD_LIGHT_GREY,
+        LCD_WHITE,
+        LCD_RED,
+        LCD_GREEN,
+        LCD_BLUE,
+        LCD_YELLOW,
+        LCD_MAGENTA,
+        LCD_CYAN,
+        LCD_DARK_RED,
+        LCD_DARK_GREEN,
+        LCD_DARK_BLUE,
+        LCD_DARK_YELLOW,
+        LCD_PURPLE,
+        LCD_TEAL,
+        LCD_BROWN,
+        LCD_PINK,
+        LCD_TURQUOISE,
+        LCD_ORANGE,
+        LCD_GOLD
+    };
+    uint8_t color = 0;
 
     // Input init
     InitGPIO_EdumkiiButtons();
@@ -33,12 +57,17 @@ int textdemo()
         if (ReadButton(BUTTON_EDUMKII_SW2))
         {
             LCD_gClear();
-            LCD_gString(3, 4, "Hello! :)", LCD_CYAN);
+            LCD_gString(3, 4, "Hello! :)", colors[color]);
             delay(1000);
             LCD_gClear();
             x = 0;
             y = 0;
             c = 0;
+        }
+        if (ReadButton(BUTTON_EDUMKII_SEL))
+        {
+            color++;
+            if (color == 21) color = 0;
         }
 
         if (!enable)
@@ -53,7 +82,7 @@ int textdemo()
             x += 6;
         if (y - 8 >= LCD_HEIGHT)
             y = 0;
-        LCD_gChar(x + 3, y + 3, c, LCD_BLUE, LCD_BLACK, 1);
+        LCD_gChar(x + 3, y + 3, c, colors[color], LCD_BLACK, 1);
     }
 }
 
