@@ -201,6 +201,37 @@ void LCD_gFillCircle(int16_t x, int16_t y, float r, LCD_pixel color);
 //      color: LCD_pixel
 void LCD_gCircle(int16_t x, int16_t y, float r, uint8_t stroke, LCD_pixel color);
 
-void LCD_gText(int16_t x, int16_t y, LCD_pixel color);
+// Draw character
+// Draws a 5x7 character on the given position. If the background color is the same as the
+// text color, the background is transparent (calls LCD_gCharT)
+//  Param:
+//      x, y: top left corner position
+//      c: character to draw
+//      textColor: character color
+//      bgColor: background color
+//      size: scale of the character
+void LCD_gChar(int16_t x, int16_t y, char c, LCD_pixel textColor, LCD_pixel bgColor, uint8_t size);
+
+// Draw character with transparent background
+// Draws a 5x7 character on the given position.
+//  Param:
+//      x, y: top left corner position
+//      c: character to draw
+//      textColor: character color
+//      size: scale of the character
+void LCD_gCharT(int16_t x, int16_t y, char c, LCD_pixel textColor, uint8_t size);
+
+// Draw string
+// Draws a series of 5x7 monospace characters. Size is fixed to 1 and backround for
+// the text is the background color set with LCD_SetBGColor.
+// 16 rows (0 - 15) and 21 columns (0 - 20)
+//  Param:
+//      x: column (0 - 21)
+//      y: row (0 - 15)
+//      str: string to draw
+//      textColor: character color
+//  Return:
+//      number of characters printed
+uint32_t LCD_gString(int16_t x, int16_t y, char *str, LCD_pixel textColor);
 
 #endif // LCD_H

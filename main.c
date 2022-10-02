@@ -4,6 +4,61 @@
 
 int main()
 {
+    textdemo();
+}
+
+int textdemo()
+{
+    char c = 0;
+    uint8_t x = 0, y = 0;
+    char enable = 1;
+
+    // Input init
+    InitGPIO_EdumkiiButtons();
+    InitGPIO_EdumkiiJoystick();
+
+    // Output init
+    LCD_Init();
+    LCD_CS(LOW);
+    
+    LCD_SetBGColor(LCD_BLACK);
+    LCD_gClear();
+
+    while (1)
+    {
+        if (ReadButton(BUTTON_EDUMKII_SW1))
+        {
+            enable = !enable;
+        }
+        if (ReadButton(BUTTON_EDUMKII_SW2))
+        {
+            LCD_gClear();
+            LCD_gString(3, 4, "Hello! :)", LCD_CYAN);
+            delay(1000);
+            LCD_gClear();
+            x = 0;
+            y = 0;
+            c = 0;
+        }
+
+        if (!enable)
+            continue;
+        c++;
+        if (x + 12 >= LCD_WIDTH)
+        {
+            x = 0;
+            y += 8;
+        }
+        else
+            x += 6;
+        if (y - 8 >= LCD_HEIGHT)
+            y = 0;
+        LCD_gChar(x + 3, y + 3, c, LCD_BLUE, LCD_BLACK, 1);
+    }
+}
+
+int graphicsdemo()
+{
     LCD_Settings actSettings;
     point old_pos, pos, js = { 2048, 2048 };    // Joystick centered to begin with
     LCD_pixel colors[6] = { LCD_RED, LCD_YELLOW, LCD_GREEN, LCD_CYAN, LCD_BLUE, LCD_MAGENTA };
@@ -102,7 +157,7 @@ int main()
             // LCD_gTriangle((point) {old_pos.x, old_pos.y - 5}, (point) {old_pos.x + 5, old_pos.y + 5}, (point) {old_pos.x - 5, old_pos.y + 5}, 1, actSettings.BGColor);
             // LCD_gFillTriangle((point) {old_pos.x, old_pos.y - 5}, (point) {old_pos.x + 5, old_pos.y + 5}, (point) {old_pos.x - 5, old_pos.y + 5}, actSettings.BGColor);
             // LCD_gPolygon(old_rhombus, 4, 1, actSettings.BGColor);
-            LCD_gCircle(old_pos.x, old_pos.y, 7, 1, actSettings.BGColor);
+            LCD_gCircle(old_pos.x, old_pos.y, 6, 1, actSettings.BGColor);
             // LCD_gFillCircle(old_pos.x, old_pos.y, 7, actSettings.BGColor);
             
             // Draw new shapes
@@ -111,7 +166,7 @@ int main()
             // LCD_gTriangle((point) {pos.x, pos.y - 5}, (point) {pos.x + 5, pos.y + 5}, (point) {pos.x - 5, pos.y + 5}, 1, colors[i]);
             // LCD_gFillTriangle((point) {pos.x, pos.y - 5}, (point) {pos.x + 5, pos.y + 5}, (point) {pos.x - 5, pos.y + 5}, colors[i]);
             // LCD_gPolygon(rhombus, 4, 1, colors[i]);
-            LCD_gCircle(pos.x, pos.y, 7, 1, colors[i]);
+            LCD_gCircle(pos.x, pos.y, 6, 1, colors[i]);
             // LCD_gFillCircle(pos.x, pos.y, 7, colors[i]);
 
             changeFlag = 0;
