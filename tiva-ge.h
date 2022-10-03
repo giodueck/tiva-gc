@@ -23,6 +23,8 @@ typedef struct GE_Joystick
 {
     point pos;
     uint8_t changed;
+    uint8_t up, down, left, right;
+    point threshold;;
 } GE_Joystick;
 
 extern GE_Joystick JS;

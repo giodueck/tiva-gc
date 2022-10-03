@@ -21,6 +21,9 @@ void GE_Setup(void)
     
     LCD_SetBGColor(LCD_BLACK);
     LCD_gClear();
+
+    // Settings
+    JS.threshold = (point) { .x = 1024, .y = 1024 };
 }
 
 // Reads from all input buttons and the joystick. Used by the game engine
@@ -41,6 +44,13 @@ void GE_Input(void)
 
     JS.pos = Input_ReadJoystick();
     JS.changed = (old.x != JS.pos.x || old.y != JS.pos.y);
+    if (JS.changed)
+    {
+        JS.up = (JS.pos.y < 2048 - JS.threshold.y);
+        JS.down = (JS.pos.y > 2048 + JS.threshold.y);
+        JS.left = (JS.pos.x < 2048 - JS.threshold.x);
+        JS.right = (JS.pos.x > 2048 + JS.threshold.x);
+    }
 }
 
 // Set the main menu function, without it the engine will not function properly as
@@ -85,12 +95,14 @@ void GE_Loop(void)
         // Menu
         while (!_update)
         {
+            GE_Input();
             _mainMenu();
         }
 
         // Gameloop
         while (_update)
         {
+            GE_Input();
             if (!_update(0.0f))
                 _update = NULL;
         }

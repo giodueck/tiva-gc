@@ -600,7 +600,7 @@ pixel LCD_Ui32ToPixel(uint32_t p)
 // Clear screen to background color
 void LCD_gClear()
 {
-    LCD_gFillRectangle(0, 0, LCD_WIDTH, LCD_HEIGHT, _active_settings.BGColor);
+    LCD_gFillRect(0, 0, LCD_WIDTH, LCD_HEIGHT, _active_settings.BGColor);
 }
 
 void LCD_gVLine(int16_t x, int16_t y1, int16_t y2, uint8_t stroke, pixel color)
@@ -776,7 +776,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, p
 //      x, y: column and row of first corner
 //      w, h: width and height
 //      color: pixel
-void LCD_gFillRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, pixel color)
+void LCD_gFillRect(int16_t x, int16_t y, uint8_t w, uint8_t h, pixel color)
 {
     LCD_SetArea(x, y, x + w, y + h);
     LCD_ActivateWrite();
@@ -791,7 +791,7 @@ void LCD_gFillRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, pixel color)
 //      x, y: column and row of first corner
 //      w, h: width and height
 //      color: pixel
-void LCD_gRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, pixel color)
+void LCD_gRect(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, pixel color)
 {
     if (w == 0 || h == 0)
         return;
@@ -1053,7 +1053,7 @@ void LCD_gChar(int16_t x, int16_t y, char c, pixel textColor, pixel bgColor, uin
     }
 
     // + 3 accounts for the space in the memory buffer that is offscreen
-    LCD_SetArea(x + 3, y + 3, x + 6 * size + 2, y + 8 * size  + 2);
+    LCD_SetArea(x + 3, y + 3, x + 6 * size + 2, y + 8 * size + 2);
     LCD_ActivateWrite();
 
     line = 0x01;    // print top row first
@@ -1081,6 +1081,8 @@ void LCD_gChar(int16_t x, int16_t y, char c, pixel textColor, pixel bgColor, uin
                 LCD_PushPixel(bgColor.r, bgColor.g, bgColor.b);
         }
     }
+    // print black column on the left of the character
+    LCD_gVLine(x + 2, y + 3, y + 8 * size + 2, 1, bgColor);
 }
 
 // Draw character
@@ -1115,7 +1117,7 @@ void LCD_gCharT(int16_t x, int16_t y, char c, pixel textColor, uint8_t size)
                 if (size == 1)
                     LCD_gDrawPixel((uint8_t) x + i + 3, (uint8_t) y + j + 3, textColor.r, textColor.g, textColor.b);
                 else
-                    LCD_gFillRectangle(x + 3, y + 3, i * size, j * size, textColor);
+                    LCD_gFillRect(x + 3, y + 3, i * size, j * size, textColor);
             }
         }
     }
@@ -1123,7 +1125,8 @@ void LCD_gCharT(int16_t x, int16_t y, char c, pixel textColor, uint8_t size)
 
 // Draw string
 // Draws a series of 5x7 monospace characters. Size is fixed to 1 and backround for
-// the text is the background color set with LCD_SetBGColor.
+// the text is the background color set with LCD_SetBGColor. If the background color
+// is the same as the text color, the background is transparent
 // 16 rows (0 - 15) and 21 columns (0 - 20)
 //  Param:
 //      x: column (0 - 21)

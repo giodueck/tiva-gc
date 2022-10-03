@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include "tiva-gc-inc.h"
 
+// Effective size is smaller, since the screen has a 3 pixels deep zone on the borders that are not visible
 #define LCD_HEIGHT 132
 #define LCD_WIDTH  132
 
@@ -15,7 +16,7 @@ typedef struct pixel
 } pixel;
 
 #define LCD_BLACK       (pixel) { 0x00, 0x00, 0x00 }
-#define LCD_DARK_GREY   (pixel) { 0x1A, 0x1A, 0x1A }
+#define LCD_DARK_GREY   (pixel) { 0x10, 0x10, 0x10 }
 #define LCD_GREY        (pixel) { 0x20, 0x20, 0x20 }
 #define LCD_LIGHT_GREY  (pixel) { 0x30, 0x30, 0x30 }
 #define LCD_WHITE       (pixel) { 0x3F, 0x3F, 0x3F }
@@ -160,7 +161,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, p
 //      x, y: column and row of first corner
 //      w, h: width and height
 //      color: pixel
-void LCD_gFillRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, pixel color);
+void LCD_gFillRect(int16_t x, int16_t y, uint8_t w, uint8_t h, pixel color);
 
 // Rectangle outline
 //  Param:
@@ -168,7 +169,7 @@ void LCD_gFillRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, pixel color)
 //      w, h: width and height
 //      stroke: edge width
 //      color: pixel
-void LCD_gRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, pixel color);
+void LCD_gRect(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, pixel color);
 
 // Filled Triangle
 //  Param:
@@ -233,7 +234,8 @@ void LCD_gCharT(int16_t x, int16_t y, char c, pixel textColor, uint8_t size);
 
 // Draw string
 // Draws a series of 5x7 monospace characters. Size is fixed to 1 and backround for
-// the text is the background color set with LCD_SetBGColor.
+// the text is the background color set with LCD_SetBGColor. If the background color
+// is the same as the text color, the background is transparent
 // 16 rows (0 - 15) and 21 columns (0 - 20)
 //  Param:
 //      x: column (0 - 21)
