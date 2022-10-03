@@ -74,8 +74,8 @@ void GE_Loop(void)
     // Checks for menus or games set
     if (!_mainMenu && !_update)
     {
-        LCD_gString(0, 0, "E: No main menu", LCD_RED);
-        LCD_gString(3, 1, "function set!", LCD_RED);
+        LCD_gString(0, 0, "E: No main menu", 0, LCD_RED);
+        LCD_gString(3, 1, "function set!", 0, LCD_RED);
         while (1);
     }
 

@@ -4,7 +4,7 @@
 
 void GEdemoMenu(void)
 {
-    LCD_pixel colors[21] = {
+    pixel colors[21] = {
         LCD_DARK_GREY,
         LCD_GREY,
         LCD_LIGHT_GREY,
@@ -30,7 +30,7 @@ void GEdemoMenu(void)
     static uint8_t color = 0;
 
     LCD_SetBGColor(colors[color]);
-    LCD_gString(0, 0, "Inside menu loop", LCD_GREEN);
+    LCD_gString(0, 0, "Inside menu loop", 0, LCD_GREEN);
     LCD_gChar(0, 8, color, LCD_MAGENTA, colors[color], 2);
 
     color++;
@@ -52,7 +52,7 @@ int textdemo(void)
     char c = 0;
     uint8_t x = 0, y = 0;
     char enable = 1;
-    LCD_pixel colors[21] = {
+    pixel colors[21] = {
         LCD_DARK_GREY,
         LCD_GREY,
         LCD_LIGHT_GREY,
@@ -97,7 +97,7 @@ int textdemo(void)
         if (Input_ReadButton(BUTTON_EDUMKII_SW2))
         {
             LCD_gClear();
-            LCD_gString(3, 4, "Hello! :)", colors[color]);
+            LCD_gString(3, 4, "Hello! :)", 0, colors[color]);
             delay(1000);
             LCD_gClear();
             x = 0;
@@ -130,7 +130,7 @@ int graphicsdemo(void)
 {
     LCD_Settings actSettings;
     point old_pos, pos, js = { 2048, 2048 };    // Joystick centered to begin with
-    LCD_pixel colors[6] = { LCD_RED, LCD_YELLOW, LCD_GREEN, LCD_CYAN, LCD_BLUE, LCD_MAGENTA };
+    pixel colors[6] = { LCD_RED, LCD_YELLOW, LCD_GREEN, LCD_CYAN, LCD_BLUE, LCD_MAGENTA };
     uint8_t i = 0, changeFlag = 0;
     point old_rhombus[4], rhombus[4];
     

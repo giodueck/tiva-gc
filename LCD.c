@@ -324,7 +324,7 @@ void WriteSPI(uint8_t data);
 void LCD_Command(uint8_t command);
 void LCD_Data(uint8_t data);
 void LCD_DataBuffer(uint8_t *buffer, uint32_t count);
-void LCD_gCharT(int16_t x, int16_t y, char c, LCD_pixel textColor, uint8_t size);
+void LCD_gCharT(int16_t x, int16_t y, char c, pixel textColor, uint8_t size);
 
 // Initializes SSI as SPI to EDUMKII display
 void InitSPI(void)
@@ -429,8 +429,8 @@ LCD_Settings LCD_GetSettings()
 // Set LCD Background color
 // Used by some drawing primitives
 //  Param:
-//      LCD_pixel: new background color
-void LCD_SetBGColor(LCD_pixel bgColor)
+//      pixel: new background color
+void LCD_SetBGColor(pixel bgColor)
 {
     _active_settings.BGColor = bgColor;
 }
@@ -584,13 +584,13 @@ void LCD_PushPixel(uint8_t red, uint8_t green, uint8_t blue)
     LCD_Data(blue << 2);
 }
 
-// Convert a 3 byte pixel (Eg #FF004A) uint32_t into LCD_pixel
+// Convert a 3 byte pixel (Eg #FF004A) uint32_t into pixel
 // Precision loss: 8-bit -> 6-bit
 //  Param:
 //      p: 32-bit integer. Bits [23:0] are used
-LCD_pixel LCD_Ui32ToPixel(uint32_t p)
+pixel LCD_Ui32ToPixel(uint32_t p)
 {
-    LCD_pixel pixel;
+    pixel pixel;
     pixel.r = ((p >> 16) & 0xFF) >> 2;
     pixel.g = ((p >> 8) & 0xFF) >> 2;
     pixel.b = (p & 0xFF) >> 2;
@@ -603,7 +603,7 @@ void LCD_gClear()
     LCD_gFillRectangle(0, 0, LCD_WIDTH, LCD_HEIGHT, _active_settings.BGColor);
 }
 
-void LCD_gVLine(int16_t x, int16_t y1, int16_t y2, uint8_t stroke, LCD_pixel color)
+void LCD_gVLine(int16_t x, int16_t y1, int16_t y2, uint8_t stroke, pixel color)
 {
     int16_t aux;
     
@@ -629,7 +629,7 @@ void LCD_gVLine(int16_t x, int16_t y1, int16_t y2, uint8_t stroke, LCD_pixel col
         LCD_PushPixel(color.r, color.g, color.b);
 }
 
-void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, LCD_pixel color)
+void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, pixel color)
 {
     int16_t aux;
     
@@ -655,7 +655,7 @@ void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, LCD_pixel col
         LCD_PushPixel(color.r, color.g, color.b);
 }
 
-void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, LCD_pixel color)
+void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, pixel color)
 {
     /*
         Steps:
@@ -775,8 +775,8 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, L
 //  Param:
 //      x, y: column and row of first corner
 //      w, h: width and height
-//      color: LCD_pixel
-void LCD_gFillRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, LCD_pixel color)
+//      color: pixel
+void LCD_gFillRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, pixel color)
 {
     LCD_SetArea(x, y, x + w, y + h);
     LCD_ActivateWrite();
@@ -790,8 +790,8 @@ void LCD_gFillRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, LCD_pixel co
 //  Param:
 //      x, y: column and row of first corner
 //      w, h: width and height
-//      color: LCD_pixel
-void LCD_gRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, LCD_pixel color)
+//      color: pixel
+void LCD_gRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, pixel color)
 {
     if (w == 0 || h == 0)
         return;
@@ -808,8 +808,8 @@ void LCD_gRectangle(int16_t x, int16_t y, uint8_t w, uint8_t h, uint8_t stroke, 
 //      v2: second vertex
 //      v3: third vertex
 //      stroke: edge width
-//      color: LCD_pixel
-void LCD_gTriangle(point v1, point v2, point v3, uint8_t stroke, LCD_pixel color)
+//      color: pixel
+void LCD_gTriangle(point v1, point v2, point v3, uint8_t stroke, pixel color)
 {
     LCD_gLine(v1.x, v1.y, v2.x, v2.y, stroke, color);
     LCD_gLine(v2.x, v2.y, v3.x, v3.y, stroke, color);
@@ -821,8 +821,8 @@ void LCD_gTriangle(point v1, point v2, point v3, uint8_t stroke, LCD_pixel color
 //      v1: first vertex
 //      v2: second vertex
 //      v3: third vertex
-//      color: LCD_pixel
-void LCD_gFillTriangle(point v1, point v2, point v3, LCD_pixel color)
+//      color: pixel
+void LCD_gFillTriangle(point v1, point v2, point v3, pixel color)
 {
     // Algorithm taken from https://www.sunshine2k.de/coding/java/TriangleRasterization/TriangleRasterization.html
     // Note that in this function top is higher y, when in reality this is not necessarily the case.
@@ -919,8 +919,8 @@ void LCD_gFillTriangle(point v1, point v2, point v3, LCD_pixel color)
 //      vertices: array of vertices
 //      n_vertices: size of vertices array
 //      stroke: edge width
-//      color: LCD_pixel
-void LCD_gPolygon(point *vertices, int n_vertices, uint8_t stroke, LCD_pixel color)
+//      color: pixel
+void LCD_gPolygon(point *vertices, int n_vertices, uint8_t stroke, pixel color)
 {
     int i;
     for (i = 0; i < n_vertices - 1; i++)
@@ -935,8 +935,8 @@ void LCD_gPolygon(point *vertices, int n_vertices, uint8_t stroke, LCD_pixel col
 //      x, y: circle center position
 //      r: circle radius
 //      stroke: outline width
-//      color: LCD_pixel
-void LCD_gCircle(int16_t x, int16_t y, float r, uint8_t stroke, LCD_pixel color)
+//      color: pixel
+void LCD_gCircle(int16_t x, int16_t y, float r, uint8_t stroke, pixel color)
 {
     int16_t x_ = 1, y_ = r;
     int16_t r2 = r * r + 1;
@@ -982,8 +982,8 @@ void LCD_gCircle(int16_t x, int16_t y, float r, uint8_t stroke, LCD_pixel color)
 //  Param:
 //      x, y: circle center position
 //      r: circle radius
-//      color: LCD_pixel
-void LCD_gFillCircle(int16_t x, int16_t y, float r, LCD_pixel color)
+//      color: pixel
+void LCD_gFillCircle(int16_t x, int16_t y, float r, pixel color)
 {
     int16_t x_ = 1, y_ = r;
     int16_t r2 = r * r + 1;
@@ -1036,7 +1036,7 @@ void LCD_gFillCircle(int16_t x, int16_t y, float r, LCD_pixel color)
 //      textColor: character color
 //      bgColor: background color
 //      size: scale of the character
-void LCD_gChar(int16_t x, int16_t y, char c, LCD_pixel textColor, LCD_pixel bgColor, uint8_t size)
+void LCD_gChar(int16_t x, int16_t y, char c, pixel textColor, pixel bgColor, uint8_t size)
 {
     uint8_t line;
 
@@ -1053,7 +1053,7 @@ void LCD_gChar(int16_t x, int16_t y, char c, LCD_pixel textColor, LCD_pixel bgCo
     }
 
     // + 3 accounts for the space in the memory buffer that is offscreen
-    LCD_SetArea(x + 3, y + 3, x + 6 * size - 1 + 3, y + 8 * size - 1 + 3);
+    LCD_SetArea(x + 3, y + 3, x + 6 * size + 2, y + 8 * size  + 2);
     LCD_ActivateWrite();
 
     line = 0x01;    // print top row first
@@ -1092,7 +1092,7 @@ void LCD_gChar(int16_t x, int16_t y, char c, LCD_pixel textColor, LCD_pixel bgCo
 //      textColor: character color
 //      bgColor: background color
 //      size: scale of the character
-void LCD_gCharT(int16_t x, int16_t y, char c, LCD_pixel textColor, uint8_t size)
+void LCD_gCharT(int16_t x, int16_t y, char c, pixel textColor, uint8_t size)
 {
     uint8_t line;
 
@@ -1129,10 +1129,11 @@ void LCD_gCharT(int16_t x, int16_t y, char c, LCD_pixel textColor, uint8_t size)
 //      x: column (0 - 21)
 //      y: row (0 - 15)
 //      str: string to draw
+//      len: amount of characters to be printed, if 0 prints as many as possible
 //      textColor: character color
 //  Return:
 //      number of characters printed
-uint32_t LCD_gString(int16_t x, int16_t y, char *str, LCD_pixel textColor)
+uint32_t LCD_gString(int16_t x, int16_t y, char *str, uint8_t len, pixel textColor)
 {
     uint32_t count = 0;
 
@@ -1145,6 +1146,8 @@ uint32_t LCD_gString(int16_t x, int16_t y, char *str, LCD_pixel textColor)
         x += 1;
         if (x > 20) return count;
         count++;
+        if (len && count == len)
+            return count;
     }
     return count;
 }
