@@ -535,6 +535,11 @@ void LCD_SetArea(int16_t colStart, int16_t rowStart, int16_t colEnd, int16_t row
     if (rowEnd >= LCD_HEIGHT)
         rowEnd = LCD_HEIGHT - 1;
     
+    colStart += 2;
+    colEnd += 2;
+    rowStart += 3;
+    rowEnd += 3;
+    
     /* write column address; requires 4 bytes of the buffer */
     buffer[0] = (colStart >> 8) & 0x00FF; /* MSB */ /* =0 for ST7735S */
     buffer[1] =  colStart       & 0x00FF; /* LSB */
@@ -621,12 +626,9 @@ void LCD_gVLine(int16_t x, int16_t y1, int16_t y2, uint8_t stroke, pixel color)
     if ((x - ((stroke - 1) >> 1) < 0 && x + (stroke >> 1) < 0) || (x - ((stroke - 1) >> 1) > (LCD_WIDTH - 1) && x + (stroke >> 1) > (LCD_WIDTH - 1)))
         return;
 
-    // Rectangular area, y2 - y1 pixels high, stroke pixels wide
-    LCD_SetArea(max(0, x - ((stroke - 1) >> 1)), y1, min(LCD_WIDTH - 1, x + (stroke >> 1)), y2);
-    LCD_ActivateWrite();
-
-    for (int i = 0; i < (y2 - y1) * stroke * x; i++)
-        LCD_PushPixel(color.r, color.g, color.b);
+    x = max(0, x - ((stroke - 1) >> 1));
+    aux = min(LCD_WIDTH - 1, x + (stroke >> 1));
+    LCD_gFillRect(x, y1, aux - x, y2 - y1, color);
 }
 
 void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, pixel color)
@@ -647,12 +649,9 @@ void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, pixel color)
     if ((y - ((stroke - 1) >> 1) < 0 && y + (stroke >> 1) < 0) || (y - ((stroke - 1) >> 1) > (LCD_HEIGHT - 1) && y + (stroke >> 1) > (LCD_HEIGHT - 1)))
         return;
 
-    // Rectangular area, y2 - y1 pixels high, stroke pixels wide
-    LCD_SetArea(x1, max(0, y - ((stroke - 1) >> 1)), x2, min(LCD_HEIGHT - 1, y + (stroke >> 1)));
-    LCD_ActivateWrite();
-
-    for (int i = 0; i < (x2 - x1) * stroke * y; i++)
-        LCD_PushPixel(color.r, color.g, color.b);
+    y = max(0, y - ((stroke - 1) >> 1));
+    aux = min(LCD_HEIGHT - 1, y + (stroke >> 1));
+    LCD_gFillRect(x1, y, x2 - x1, aux - y, color);
 }
 
 void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, pixel color)
@@ -1052,8 +1051,7 @@ void LCD_gChar(int16_t x, int16_t y, char c, pixel textColor, pixel bgColor, uin
         return;
     }
 
-    // + 3 accounts for the space in the memory buffer that is offscreen
-    LCD_SetArea(x + 3, y + 3, x + 6 * size + 2, y + 8 * size + 2);
+    LCD_SetArea(x + 1, y + 1, x + 6 * size, y + 8 * size);
     LCD_ActivateWrite();
 
     line = 0x01;    // print top row first
@@ -1082,7 +1080,7 @@ void LCD_gChar(int16_t x, int16_t y, char c, pixel textColor, pixel bgColor, uin
         }
     }
     // print black column on the left of the character
-    LCD_gVLine(x + 2, y + 3, y + 8 * size + 2, 1, bgColor);
+    LCD_gVLine(x, y + 1, y + 8 * size, 1, bgColor);
 }
 
 // Draw character
@@ -1115,9 +1113,9 @@ void LCD_gCharT(int16_t x, int16_t y, char c, pixel textColor, uint8_t size)
             if (line & 0x01)
             {
                 if (size == 1)
-                    LCD_gDrawPixel((uint8_t) x + i + 3, (uint8_t) y + j + 3, textColor.r, textColor.g, textColor.b);
+                    LCD_gDrawPixel((uint8_t) x + i + 1, (uint8_t) y + j + 1, textColor.r, textColor.g, textColor.b);
                 else
-                    LCD_gFillRect(x + 3, y + 3, i * size, j * size, textColor);
+                    LCD_gFillRect(x + 1, y + 1, i * size, j * size, textColor);
             }
         }
     }
