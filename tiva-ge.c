@@ -32,22 +32,22 @@ void GE_Input(void)
     uint8_t sw1_s, sw2_s, sel_s;
     point old = JS.pos;
 
-    sw1_s = Input_ReadButton(BUTTON_EDUMKII_SW1);
-    sw2_s = Input_ReadButton(BUTTON_EDUMKII_SW2);
-    sel_s = Input_ReadButton(BUTTON_EDUMKII_SEL);
+    sw1_s = Input_ReadButtonRaw(BUTTON_EDUMKII_SW1);
+    sw2_s = Input_ReadButtonRaw(BUTTON_EDUMKII_SW2);
+    sel_s = Input_ReadButtonRaw(BUTTON_EDUMKII_SEL);
     SW1.pressed = Input_ReadButton(BUTTON_EDUMKII_SW1);
     SW2.pressed = Input_ReadButton(BUTTON_EDUMKII_SW2);
     SEL.pressed = Input_ReadButton(BUTTON_EDUMKII_SEL);
-    SW1.held = SW1.pressed || sw1_s && Input_ReadButton(BUTTON_EDUMKII_SW1);
-    SW2.held = SW2.pressed || sw2_s && Input_ReadButton(BUTTON_EDUMKII_SW2);
-    SEL.held = SEL.pressed || sel_s && Input_ReadButton(BUTTON_EDUMKII_SEL);
+    SW1.held = SW1.pressed || sw1_s && Input_ReadButtonRaw(BUTTON_EDUMKII_SW1);
+    SW2.held = SW2.pressed || sw2_s && Input_ReadButtonRaw(BUTTON_EDUMKII_SW2);
+    SEL.held = SEL.pressed || sel_s && Input_ReadButtonRaw(BUTTON_EDUMKII_SEL);
 
     JS.pos = Input_ReadJoystick();
     JS.changed = (old.x != JS.pos.x || old.y != JS.pos.y);
     if (JS.changed)
     {
-        JS.up = (JS.pos.y < 2048 - JS.threshold.y);
-        JS.down = (JS.pos.y > 2048 + JS.threshold.y);
+        JS.down = (JS.pos.y < 2048 - JS.threshold.y);
+        JS.up = (JS.pos.y > 2048 + JS.threshold.y);
         JS.left = (JS.pos.x < 2048 - JS.threshold.x);
         JS.right = (JS.pos.x > 2048 + JS.threshold.x);
     }
@@ -87,6 +87,12 @@ void GE_Loop(void)
         LCD_gString(0, 0, "E: No main menu", 0, LCD_RED);
         LCD_gString(3, 1, "function set!", 0, LCD_RED);
         while (1);
+    }
+
+    // Let inputs stabilize, especially JS
+    for (int i = 0; i < 3; i++)
+    {
+        GE_Input();
     }
 
     // Main program loop
