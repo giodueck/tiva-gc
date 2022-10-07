@@ -628,7 +628,7 @@ void LCD_gVLine(int16_t x, int16_t y1, int16_t y2, uint8_t stroke, pixel color)
 
     x = max(0, x - ((stroke - 1) >> 1));
     aux = min(LCD_WIDTH - 1, x + (stroke >> 1));
-    LCD_gFillRect(x, y1, aux - x, y2 - y1, color);
+    LCD_gFillRect(x, y1, aux - x + 1, y2 - y1 + 1, color);
 }
 
 void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, pixel color)
@@ -651,7 +651,7 @@ void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, pixel color)
 
     y = max(0, y - ((stroke - 1) >> 1));
     aux = min(LCD_HEIGHT - 1, y + (stroke >> 1));
-    LCD_gFillRect(x1, y, x2 - x1, aux - y, color);
+    LCD_gFillRect(x1, y, x2 - x1 + 1, aux - y + 1, color);
 }
 
 void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, pixel color)
@@ -777,7 +777,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, p
 //      color: pixel
 void LCD_gFillRect(int16_t x, int16_t y, uint8_t w, uint8_t h, pixel color)
 {
-    LCD_SetArea(x, y, x + w, y + h);
+    LCD_SetArea(x, y, x + w - 1, y + h - 1);
     LCD_ActivateWrite();
 
     for (int i = 0; i <= h; i++)

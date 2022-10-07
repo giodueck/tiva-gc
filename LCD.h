@@ -4,7 +4,6 @@
 #include <stdint.h>
 #include "tiva-gc-inc.h"
 
-// Effective size is smaller, since the screen has a 3 pixels deep zone on the borders that are not visible
 #define LCD_HEIGHT 128
 #define LCD_WIDTH  128
 
