@@ -565,16 +565,26 @@ void LCD_ActivateWrite(void)
 }
 
 // LCD Draw pixel
-// Sets area of 1 pixel and sends pixel data. Requires LCD_ActivateWrite
-// to have been the last command
+// Sets area of 1 pixel and sends pixel data.
 //  Param:
+//      x, y: screenspace coordinates
 //      red, green, blue: color value. Bits [5:0] (6 bits) are sent
-void LCD_gDrawPixel(uint8_t x, uint8_t y, uint8_t red, uint8_t green, uint8_t blue)
+void LCD_gDrawPixelE(uint8_t x, uint8_t y, uint8_t red, uint8_t green, uint8_t blue)
 {
     LCD_SetArea(x, y, x, y);
     LCD_ActivateWrite();
 
     LCD_PushPixel(red, green, blue);
+}
+
+// LCD Draw pixel simplified
+// Sets area of 1 pixel and sends pixel data.
+//  Param:
+//      x, y: screenspace coordinates
+//      color: pixel containing color information
+void LCD_gDrawPixelS(uint8_t x, uint8_t y, pixel color)
+{
+    LCD_gDrawPixelE(x, y, color.r, color.g, color.b);
 }
 
 // LCD write pixel data
@@ -656,13 +666,6 @@ void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, pixel color)
 
 void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, pixel color)
 {
-    /*
-        Steps:
-            1. Define octant
-            2. Bresenham: draw pixel by pixel using LCD_gDrawPixel
-            3. If stroke is not complete, define shift in position for next line
-    */
-
     float m;
     int16_t aux;
     uint8_t octant;
@@ -712,28 +715,28 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, p
         for (y = y1; y <= y2 && y < LCD_HEIGHT; y++)
         {
             x = (y - y1) / m + x1;
-            LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
+            LCD_gDrawPixelE((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
         }
         break;
     case 1:
         for (x = x1; x <= x2 && x < LCD_WIDTH; x++)
         {
             y = m * (x - x1) + y1;
-            LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
+            LCD_gDrawPixelE((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
         }
         break;
     case 8:
         for (x = x1; x <= x2 && x < LCD_WIDTH; x++)
         {
             y = m * (x - x1) + y1;
-            LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
+            LCD_gDrawPixelE((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
         }
         break;
     case 7:
         for (y = y1; y >= y2 && y >= 0; y--)
         {
             x = (y - y1) / m + x1;
-            LCD_gDrawPixel((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
+            LCD_gDrawPixelE((uint8_t) x, (uint8_t) y, color.r, color.g, color.b);
         }
         break;
     default:
@@ -945,10 +948,10 @@ void LCD_gCircle(int16_t x, int16_t y, float r, uint8_t stroke, pixel color)
         return;
     
     // intersections with X and Y are easy using the radius
-    LCD_gDrawPixel(x + r, y, color.r, color.g, color.b);
-    LCD_gDrawPixel(x - r, y, color.r, color.g, color.b);
-    LCD_gDrawPixel(x, y + r, color.r, color.g, color.b);
-    LCD_gDrawPixel(x, y - r, color.r, color.g, color.b);
+    LCD_gDrawPixelE(x + r, y, color.r, color.g, color.b);
+    LCD_gDrawPixelE(x - r, y, color.r, color.g, color.b);
+    LCD_gDrawPixelE(x, y + r, color.r, color.g, color.b);
+    LCD_gDrawPixelE(x, y - r, color.r, color.g, color.b);
 
     while (y_ / x_ >= 1)
     {
@@ -963,14 +966,14 @@ void LCD_gCircle(int16_t x, int16_t y, float r, uint8_t stroke, pixel color)
             y_--;
         }
 
-        LCD_gDrawPixel(x + x_, y - y_, color.r, color.g, color.b);
-        LCD_gDrawPixel(x - x_, y - y_, color.r, color.g, color.b);
-        LCD_gDrawPixel(x + x_, y + y_, color.r, color.g, color.b);
-        LCD_gDrawPixel(x - x_, y + y_, color.r, color.g, color.b);
-        LCD_gDrawPixel(x + y_, y - x_, color.r, color.g, color.b);
-        LCD_gDrawPixel(x - y_, y - x_, color.r, color.g, color.b);
-        LCD_gDrawPixel(x + y_, y + x_, color.r, color.g, color.b);
-        LCD_gDrawPixel(x - y_, y + x_, color.r, color.g, color.b);
+        LCD_gDrawPixelE(x + x_, y - y_, color.r, color.g, color.b);
+        LCD_gDrawPixelE(x - x_, y - y_, color.r, color.g, color.b);
+        LCD_gDrawPixelE(x + x_, y + y_, color.r, color.g, color.b);
+        LCD_gDrawPixelE(x - x_, y + y_, color.r, color.g, color.b);
+        LCD_gDrawPixelE(x + y_, y - x_, color.r, color.g, color.b);
+        LCD_gDrawPixelE(x - y_, y - x_, color.r, color.g, color.b);
+        LCD_gDrawPixelE(x + y_, y + x_, color.r, color.g, color.b);
+        LCD_gDrawPixelE(x - y_, y + x_, color.r, color.g, color.b);
         x_++;
     }
 
@@ -993,8 +996,8 @@ void LCD_gFillCircle(int16_t x, int16_t y, float r, pixel color)
     
     // intersections with X and Y are easy using the radius
     LCD_gHLine(x - r, x + r, y, 1, color);
-    LCD_gDrawPixel(x, y + r, color.r, color.g, color.b);
-    LCD_gDrawPixel(x, y - r, color.r, color.g, color.b);
+    LCD_gDrawPixelE(x, y + r, color.r, color.g, color.b);
+    LCD_gDrawPixelE(x, y - r, color.r, color.g, color.b);
 
     while (y_ / x_ >= 1)
     {
@@ -1013,10 +1016,10 @@ void LCD_gFillCircle(int16_t x, int16_t y, float r, pixel color)
             LCD_gHLine(x - x_, x + x_, y + y_, 1, color);
         } else
         {
-            LCD_gDrawPixel(x + x_, y - y_, color.r, color.g, color.b);
-            LCD_gDrawPixel(x - x_, y - y_, color.r, color.g, color.b);
-            LCD_gDrawPixel(x + x_, y + y_, color.r, color.g, color.b);
-            LCD_gDrawPixel(x - x_, y + y_, color.r, color.g, color.b);
+            LCD_gDrawPixelE(x + x_, y - y_, color.r, color.g, color.b);
+            LCD_gDrawPixelE(x - x_, y - y_, color.r, color.g, color.b);
+            LCD_gDrawPixelE(x + x_, y + y_, color.r, color.g, color.b);
+            LCD_gDrawPixelE(x - x_, y + y_, color.r, color.g, color.b);
         }
 
         LCD_gHLine(x - y_, x + y_, y - x_, 1, color);
@@ -1113,7 +1116,7 @@ void LCD_gCharT(int16_t x, int16_t y, char c, pixel textColor, uint8_t size)
             if (line & 0x01)
             {
                 if (size == 1)
-                    LCD_gDrawPixel((uint8_t) x + i + 1, (uint8_t) y + j + 1, textColor.r, textColor.g, textColor.b);
+                    LCD_gDrawPixelE((uint8_t) x + i + 1, (uint8_t) y + j + 1, textColor.r, textColor.g, textColor.b);
                 else
                     LCD_gFillRect(x + 1, y + 1, i * size, j * size, textColor);
             }

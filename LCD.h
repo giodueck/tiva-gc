@@ -110,12 +110,19 @@ void LCD_PushPixel(uint8_t red, uint8_t green, uint8_t blue);
 /* Graphics primitives
  */
 
-// LCD Draw pixel
-// Sets area of 1 pixel and sends pixel data. Requires LCD_ActivateWrite
-// to have been the last command
+// LCD Draw pixel elementary
+// Sets area of 1 pixel and sends pixel data.
 //  Param:
+//      x, y: screenspace coordinates
 //      red, green, blue: color value. Bits [5:0] (6 bits) are sent
-void LCD_gDrawPixel(uint8_t x, uint8_t y, uint8_t red, uint8_t green, uint8_t blue);
+void LCD_gDrawPixelE(uint8_t x, uint8_t y, uint8_t red, uint8_t green, uint8_t blue);
+
+// LCD Draw pixel simplified
+// Sets area of 1 pixel and sends pixel data.
+//  Param:
+//      x, y: screenspace coordinates
+//      color: pixel containing color information
+void LCD_gDrawPixelS(uint8_t x, uint8_t y, pixel color);
 
 // Convert a 3 byte pixel (Eg #FF004A) uint32_t into pixel
 // Precision loss: 8-bit -> 6-bit
