@@ -227,8 +227,14 @@ int snake(float elapsedTime)
 
         // Initial drawing
             // snake
-        LCD_gFillRect(2 + (cells[0][0] << 2), 2 + (cells[0][1] << 2), 4, 8, LCD_DARK_GREEN);
-        LCD_gFillRect(3 + (cells[0][0] << 2), 2 + (cells[0][1] << 2), 2, 8, LCD_GREEN);
+        // LCD_gFillRect(2 + (cells[0][0] << 2), 2 + (cells[0][1] << 2), 4, 8, LCD_DARK_GREEN);
+        // LCD_gFillRect(3 + (cells[0][0] << 2), 2 + (cells[0][1] << 2), 2, 8, LCD_GREEN);
+
+        LCD_gFillRect(2 + (cells[0][0] << 2), 2 + (cells[0][1] << 2), 4, 4, LCD_DARK_GREEN);
+        LCD_gFillRect(3 + (cells[0][0] << 2), 2 + (cells[0][1] << 2), 2, 4, LCD_GREEN);
+        LCD_gFillRect(2 + (cells[1][0] << 2), 2 + (cells[1][1] << 2), 4, 4, LCD_DARK_GREEN);
+        LCD_gFillRect(3 + (cells[1][0] << 2), 2 + (cells[1][1] << 2), 2, 4, LCD_GREEN);
+
             // food
         LCD_gFillRect(2 + (cells[2][0] << 2), 3 + (cells[2][1] << 2), 4, 2, LCD_RED);
         LCD_gFillRect(3 + (cells[2][0] << 2), 5 + (cells[2][1] << 2), 2, 1, LCD_RED);
