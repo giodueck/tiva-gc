@@ -54,7 +54,7 @@ void GE_SetMainMenu(void (*func)(void));
 void GE_SetUpdate(int (*func)(void));
 
 // Runs the main gameloop
-void GE_Loop(void);
+void GE_Loop(void) __attribute__((noreturn));
 
 // Get time from SysTick
 // Return:

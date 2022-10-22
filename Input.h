@@ -42,6 +42,6 @@ point Input_ReadJoystickRaw(void);
 // the old value is returned
 //  Return:
 //      point describing the position of the joystick, 0-4095
-point Input_ReadJoystick();
+point Input_ReadJoystick(void);
 
 #endif // INPUT_H

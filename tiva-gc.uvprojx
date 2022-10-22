@@ -455,16 +455,6 @@
               <FilePath>.\tiva-ge.h</FilePath>
             </File>
             <File>
-              <FileName>demo.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\demo.c</FilePath>
-            </File>
-            <File>
-              <FileName>demo.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\demo.h</FilePath>
-            </File>
-            <File>
               <FileName>systick.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\systick.c</FilePath>

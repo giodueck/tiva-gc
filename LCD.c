@@ -944,7 +944,7 @@ void LCD_gCircle(int16_t x, int16_t y, float r, uint8_t stroke, pixel color)
     int16_t r2 = r * r + 1;
     int16_t res, res2;
 
-    if (r == 0)
+    if (r == 0.0f)
         return;
     
     // intersections with X and Y are easy using the radius
@@ -991,7 +991,7 @@ void LCD_gFillCircle(int16_t x, int16_t y, float r, pixel color)
     int16_t r2 = r * r + 1;
     int16_t res, res2;
 
-    if (r == 0)
+    if (r == 0.0f)
         return;
     
     // intersections with X and Y are easy using the radius
@@ -1137,7 +1137,7 @@ void LCD_gCharT(int16_t x, int16_t y, char c, pixel textColor, uint8_t size)
 //      textColor: character color
 //  Return:
 //      number of characters printed
-uint32_t LCD_gString(int16_t x, int16_t y, char *str, uint8_t len, pixel textColor)
+uint32_t LCD_gString(int16_t x, int16_t y, const char *str, uint8_t len, pixel textColor)
 {
     uint32_t count = 0;
 

@@ -251,6 +251,6 @@ void LCD_gCharT(int16_t x, int16_t y, char c, pixel textColor, uint8_t size);
 //      textColor: character color
 //  Return:
 //      number of characters printed
-uint32_t LCD_gString(int16_t x, int16_t y, char *str, uint8_t len, pixel textColor);
+uint32_t LCD_gString(int16_t x, int16_t y, const char *str, uint8_t len, pixel textColor);
 
 #endif // LCD_H

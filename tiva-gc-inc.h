@@ -1,6 +1,8 @@
 #ifndef TIVA_GC_INC_H
 #define TIVA_GC_INC_H
 
+#include <stddef.h>
+
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))
 #define abs(a)    ((a) < 0 ? -(a) : (a))
@@ -10,7 +12,7 @@
 #define ON   1
 #define OFF  0
 
-#define NULL ((void *)0)
+// #define NULL ((void *)0)
 
 #define CLOCKS_PER_SEC 16000000
 
