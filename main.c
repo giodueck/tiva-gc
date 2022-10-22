@@ -6,11 +6,12 @@
 // Indicates a reset is needed for the currently selected update function or the menu
 static uint8_t fReset = 0;
 static LCD_Settings settings;
+static uint32_t UPS = 5;
 
 void menu(void);
-int snake(float elapsedTime);
-int resetter(float elapsedTime);
-int random(float elapsedTime);
+int snake(void);
+int resetter(void);
+int random(void);
 
 void menu()
 {
@@ -22,7 +23,7 @@ void menu()
         "Resetter ",
         "Random   "
     };
-    const int (*games[])(float elapsedTime) = {
+    int (*games[])(void) = {
         snake,
         resetter,
         random
@@ -34,7 +35,7 @@ void menu()
     uint8_t changed = 0;
 
     // Controls
-    static GE_Button *menuSelect = &SEL;
+    static GE_Button *menuSelect = &SW1;
 
     // Reset to the main menu
     if (fReset)
@@ -117,16 +118,17 @@ void menu()
     if (chosen > -1)
     {
         GE_SetUpdate(games[chosen]);
+        LCD_gClear();
         fReset = 1;
     }
 }
 
-int resetter(float elapsedTime)
+int resetter()
 {
     return 0;
 }
 
-int random(float elapsedTime)
+int random()
 {
     if (SEL.pressed)
     {
@@ -145,6 +147,65 @@ int random(float elapsedTime)
 }
 
 enum snake_direction { UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3 };
+
+void snake_spawn_food(int8_t cells[][2], uint16_t tail_idx);
+int snake_config(void);
+
+int snake_config(void)
+{
+    static int option = 1;
+    static GE_Joystick JS_old = {0};
+    char *options[4] = {
+        "Slow  ",
+        "Medium",
+        "Fast  ",
+        "Sanic "
+    };
+    uint32_t speeds[4] = { 5, 7, 10, 15};
+    
+    if (fReset == 1)
+    {
+        LCD_gString(1, 2, "Snake speed:", 0, LCD_WHITE);
+        LCD_gString(14, 2, options[0], 0, LCD_WHITE);
+        LCD_SetBGColor(LCD_LIGHT_GREY);
+        LCD_gString(14, 3, options[1], 0, LCD_BLACK);
+        LCD_SetBGColor(settings.BGColor);
+        LCD_gString(14, 4, options[2], 0, LCD_WHITE);
+        LCD_gString(14, 5, options[3], 0, LCD_WHITE);
+        
+        option = 1;
+        fReset = 2;
+    }
+
+    if (JS.down && !JS_old.down)
+    {
+        LCD_gString(14, 2 + option, options[option], 0, LCD_WHITE);
+        
+        option = (option + 1) & 0x03;
+        
+        LCD_SetBGColor(LCD_LIGHT_GREY);
+        LCD_gString(14, 2 + option, options[option], 0, LCD_BLACK);
+        LCD_SetBGColor(settings.BGColor);
+    } else if (JS.up && !JS_old.up)
+    {
+        LCD_gString(14, 2 + option, options[option], 0, LCD_WHITE);
+        
+        option = (option + 3) & 0x03;
+        
+        LCD_SetBGColor(LCD_LIGHT_GREY);
+        LCD_gString(14, 2 + option, options[option], 0, LCD_BLACK);
+        LCD_SetBGColor(settings.BGColor);
+    }
+    JS_old = JS;
+
+    if (SW1.pressed)
+    {
+        UPS = speeds[option];
+        return 1;
+    }
+    
+    return 0;
+}
 
 void snake_spawn_food(int8_t cells[][2], uint16_t tail_idx)
 {
@@ -177,11 +238,9 @@ void snake_spawn_food(int8_t cells[][2], uint16_t tail_idx)
     cells[tail_idx + 1][1] = y;
 }
 
-int snake(float elapsedTime)
+int snake()
 {
-    static float time = 0;
-    // const float fps = 5;
-    static GE_Joystick old_JS;
+    static uint32_t time = 0;
     static uint8_t game_over = 0;
     uint8_t food_hit = 0;
 
@@ -198,9 +257,11 @@ int snake(float elapsedTime)
     // First time drawing and setup
     if (fReset)
     {
+        if (!snake_config())
+            return 1;
+        
         fReset = 0;
         game_over = 0;
-        old_JS = JS;
 
         // Draw borders
         // Playing field area: 124x124 pixels, 31x31 4x4 pixel squares
@@ -219,7 +280,10 @@ int snake(float elapsedTime)
         old_tailx = 16;
         old_taily = 17;
         facing = UP;
+        input = UP;
         old_facing = UP;
+        time = CLOCKS_PER_SEC;
+        GE_STPop();
 
         // Started food pellet
         cells[2][0] = 16;
@@ -227,9 +291,6 @@ int snake(float elapsedTime)
 
         // Initial drawing
             // snake
-        // LCD_gFillRect(2 + (cells[0][0] << 2), 2 + (cells[0][1] << 2), 4, 8, LCD_DARK_GREEN);
-        // LCD_gFillRect(3 + (cells[0][0] << 2), 2 + (cells[0][1] << 2), 2, 8, LCD_GREEN);
-
         LCD_gFillRect(2 + (cells[0][0] << 2), 2 + (cells[0][1] << 2), 4, 4, LCD_DARK_GREEN);
         LCD_gFillRect(3 + (cells[0][0] << 2), 2 + (cells[0][1] << 2), 2, 4, LCD_GREEN);
         LCD_gFillRect(2 + (cells[1][0] << 2), 2 + (cells[1][1] << 2), 4, 4, LCD_DARK_GREEN);
@@ -266,13 +327,14 @@ int snake(float elapsedTime)
 
     /* Logic */
 
-    // The game is very fast, a looping delay before the logic and drawing code allows for capturing inputs
-    // in between loops
-    time++;
-    if (time == 1250) // delay
+    // The game is very fast, a delay before the logic and drawing code but after checking inputs allows for 
+    // better reaction to inputs
+    time += GE_STPop();
+    if (time >= (CLOCKS_PER_SEC / UPS)) // delay
         time = 0;
     else
-        return 1;
+
+    return 1;
     
     old_facing = facing;    // for drawing purposes
     facing = input;         // accept last input

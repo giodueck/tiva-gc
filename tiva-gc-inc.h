@@ -12,6 +12,8 @@
 
 #define NULL ((void *)0)
 
+#define CLOCKS_PER_SEC 16000000
+
 typedef struct point
 {
     int32_t x, y;

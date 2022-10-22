@@ -10,6 +10,7 @@
 #include "InitGPIO.h"
 #include "LCD.h"
 #include "Input.h"
+#include "systick.h"
 #include "tiva-gc-inc.h"
 
 typedef struct GE_Button
@@ -50,9 +51,24 @@ void GE_SetMainMenu(void (*func)(void));
 //  0: to break the loop and return to the main menu
 // Param:
 //      func: pointer to function taking one float parameter and returning int
-void GE_SetUpdate(int (*func)(float elapsed_time));
+void GE_SetUpdate(int (*func)(void));
 
 // Runs the main gameloop
 void GE_Loop(void);
+
+// Get time from SysTick
+// Return:
+//      Ticks since last reload
+int GE_STGet(void);
+
+// Get time from SysTick and reload
+// Return:
+//      Ticks since last reload
+int GE_STPop(void);
+
+// See if SysTick reloaded since the last time this function was called
+// Return:
+//      1 if reloaded, 0 if not
+char GE_STGetCount(void);
 
 #endif // TIVA_GE_H

@@ -4,9 +4,32 @@ GE_Button SW1 = {0}, SW2 = {0}, SEL = {0};
 GE_Joystick JS = {0};
 
 static void (*_mainMenu)(void) = NULL;
-static int (*_update)(float elapsedTime) = NULL;
+static int (*_update)(void) = NULL;
 
 void GE_Input(void);
+void SysTick_Handler(void);
+
+void SysTick_Handler(void)
+{
+    return;
+}
+
+int GE_STPop(void)
+{
+    int t = GE_STGet();
+    SysTick->VAL = 0;
+    return t;
+}
+
+int GE_STGet(void)
+{
+    return CLOCKS_PER_SEC - SysTick->VAL;
+}
+
+char GE_STGetCount(void)
+{
+    return SysTick->CTRL >> 16;
+}
 
 // Performs input and screen initializations and clears screen to black.
 void GE_Setup(void)
@@ -21,6 +44,9 @@ void GE_Setup(void)
     
     LCD_SetBGColor(LCD_BLACK);
     LCD_gClear();
+    
+    // SysTick init
+    SysTick_Init(CLOCKS_PER_SEC, OFF);
 
     // Settings
     JS.threshold = (point) { .x = 1024, .y = 1024 };
@@ -38,9 +64,9 @@ void GE_Input(void)
     SW1.pressed = Input_ReadButton(BUTTON_EDUMKII_SW1);
     SW2.pressed = Input_ReadButton(BUTTON_EDUMKII_SW2);
     SEL.pressed = Input_ReadButton(BUTTON_EDUMKII_SEL);
-    SW1.held = SW1.pressed || sw1_s && Input_ReadButtonRaw(BUTTON_EDUMKII_SW1);
-    SW2.held = SW2.pressed || sw2_s && Input_ReadButtonRaw(BUTTON_EDUMKII_SW2);
-    SEL.held = SEL.pressed || sel_s && Input_ReadButtonRaw(BUTTON_EDUMKII_SEL);
+    SW1.held = SW1.pressed || (sw1_s && Input_ReadButtonRaw(BUTTON_EDUMKII_SW1));
+    SW2.held = SW2.pressed || (sw2_s && Input_ReadButtonRaw(BUTTON_EDUMKII_SW2));
+    SEL.held = SEL.pressed || (sel_s && Input_ReadButtonRaw(BUTTON_EDUMKII_SEL));
 
     JS.pos = Input_ReadJoystick();
     JS.changed = (old.x != JS.pos.x || old.y != JS.pos.y);
@@ -70,7 +96,7 @@ void GE_SetMainMenu(void (*func)(void))
 //  0: to break the loop and return to the main menu
 // Param:
 //      func: pointer to function taking one float parameter and returning int
-void GE_SetUpdate(int (*func)(float elapsed_time))
+void GE_SetUpdate(int (*func)(void))
 {
     _update = func;
 }
@@ -94,7 +120,7 @@ void GE_Loop(void)
     {
         GE_Input();
     }
-
+    
     // Main program loop
     while (1)
     {
@@ -109,9 +135,8 @@ void GE_Loop(void)
         while (_update)
         {
             GE_Input();
-            if (!_update(0.0f))
+            if (!_update())
                 _update = NULL;
         }
     }
-
 }
