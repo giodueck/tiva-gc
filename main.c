@@ -489,7 +489,7 @@ int pong(void)
         paddleThickness = 3;
         paddleWidth = 16;
         ballPos = (point) {.x = LCD_WIDTH / 2, .y = (LCD_HEIGHT + 8) / 2};
-        ballSpeed = (point) {.x = -4, .y = 3};
+        ballSpeed = (point) {.x = -4, .y = 0};
         ballSize = (point) {.x = 4, .y = 4};
         
         time = 0;
@@ -537,7 +537,7 @@ int pong(void)
 
             ballPos = (point) {.x = LCD_WIDTH / 2, .y = (LCD_HEIGHT + 8) / 2};
 
-            ballSpeed.y = GE_Rand() % (ballSize.y << 1) - ballSize.y;
+            ballSpeed.y = GE_Rand() % (5) - 2;
 
             // Scoreboard update
             scoreBoard[0][2] = '0' + p1Score % 10;

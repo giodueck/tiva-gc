@@ -10,13 +10,7 @@ static int (*_update)(void) = NULL;
 static uint32_t xorshift32_state = 0x12345678;
 
 void GE_Input(void);
-void SysTick_Handler(void);
 void GE_SRand(uint32_t seed);
-
-void SysTick_Handler(void)
-{
-    return;
-}
 
 int GE_STPop(void)
 {
