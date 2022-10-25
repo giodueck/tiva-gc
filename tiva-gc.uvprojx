@@ -464,6 +464,16 @@
               <FileType>5</FileType>
               <FilePath>.\systick.h</FilePath>
             </File>
+            <File>
+              <FileName>xorshift.s</FileName>
+              <FileType>2</FileType>
+              <FilePath>.\xorshift.s</FilePath>
+            </File>
+            <File>
+              <FileName>xorshift.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\xorshift.h</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>

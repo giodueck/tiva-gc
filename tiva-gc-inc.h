@@ -21,4 +21,9 @@ typedef struct point
     int32_t x, y;
 } point;
 
+typedef struct fpoint
+{
+    float x, y;
+} fpoint;
+
 #endif // TIVA_GC_INC_H

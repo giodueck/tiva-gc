@@ -1,32 +1,35 @@
 #include <stdint.h>
-#include <stdlib.h> // rand
 #include "TM4C123GH6PM.h"
 #include "tiva-gc.h"
 
 // Indicates a reset is needed for the currently selected update function or the menu
 static uint8_t fReset = 0;
 static LCD_Settings settings;
+// Can be used to perform some update at a regular interval using GE_STGet or GE_STPop
 static uint32_t UPS = 5;
 
 void menu(void);
 int snake(void);
-int resetter(void);
-int random(void);
+//int resetter(void);
+//int random(void);
+int pong(void);
 
 void menu()
 {
     // Persistent and read-only vars
     static uint8_t drawn = 0;
-    const uint8_t nOptions = 3;
+    const uint8_t nOptions = 2;
     const char *options[] = {
         "Snake    ",
-        "Resetter ",
-        "Random   "
+        "Pong     "
+        //"Resetter ",
+        //"Random   "
     };
     int (*games[])(void) = {
         snake,
-        resetter,
-        random
+        pong
+        //resetter,
+        //random
     };
     static int choice = 0, chosen = -1, held = 0;
     static GE_Joystick JS_old = {0};
@@ -123,6 +126,7 @@ void menu()
     }
 }
 
+/*
 int resetter()
 {
     return 0;
@@ -130,6 +134,7 @@ int resetter()
 
 int random()
 {
+    uint32_t n;
     if (SEL.pressed)
     {
         fReset = 1;
@@ -141,10 +146,14 @@ int random()
         LCD_ActivateWrite();
         for (int i = 0; i < LCD_HEIGHT; i++)
             for (int j = 0; j < LCD_WIDTH; j++)
-                LCD_PushPixel(rand() % 0x3F, rand() % 0x3F, rand() % 0x3F);
+            {
+                n = GE_Rand();
+                LCD_PushPixel(n & 0x3F, (n >> 6) & 0x3F, (n >> 12) & 0x3F);
+            }
     }
     return 1;
 }
+*/
 
 enum snake_direction { UP = 0, RIGHT = 1, DOWN = 2, LEFT = 3 };
 
@@ -214,7 +223,7 @@ void snake_spawn_food(int8_t cells[][2], uint16_t tail_idx)
 
     while (c == 31)
     {
-        x = rand() % 31;
+        x = GE_Rand() % 31;
         for (i = 0, c = 0; i <= tail_idx; i++)
         {
             if (cells[i][0] == x)
@@ -223,7 +232,7 @@ void snake_spawn_food(int8_t cells[][2], uint16_t tail_idx)
     }
     while (y == -1)
     {
-        y = rand() % 31;
+        y = GE_Rand() % 31;
         for (i = 0; i <= tail_idx; i++)
         {
             if (cells[i][0] == x && cells[i][1] == y)
@@ -259,9 +268,6 @@ int snake()
     {
         if (!snake_config())
             return 1;
-        
-        fReset = 0;
-        game_over = 0;
 
         // Draw borders
         // Playing field area: 124x124 pixels, 31x31 4x4 pixel squares
@@ -300,7 +306,10 @@ int snake()
         LCD_gFillRect(2 + (cells[2][0] << 2), 3 + (cells[2][1] << 2), 4, 2, LCD_RED);
         LCD_gFillRect(3 + (cells[2][0] << 2), 5 + (cells[2][1] << 2), 2, 1, LCD_RED);
         LCD_gFillRect(3 + (cells[2][0] << 2), 2 + (cells[2][1] << 2), 2, 1, LCD_GREEN);
-
+        
+        fReset = 0;
+        game_over = 0;
+        
         return 1;
     }
 
@@ -454,6 +463,177 @@ int snake()
         else if (old_facing == LEFT || facing == RIGHT)
             LCD_gFillRect(5 + (cells[1][0] << 2), 3 + (cells[1][1] << 2), 1, 2, LCD_GREEN);
     }
+    
+    return 1;
+}
+
+int pong(void)
+{
+    static uint16_t p1Score, p2Score, scored;
+    static uint16_t p1Pos, p2Pos, movSpeed;
+    static uint16_t paddleThickness, paddleWidth;
+    static point ballSize;
+    static point ballPos, ballSpeed;
+    static uint32_t time;
+    const int32_t topBorder = 9, bottomBorder = LCD_HEIGHT - 1, paddleX = 2, scoredTimeout = UPS;
+    static char scoreBoard[2][4];
+    
+    if (fReset)
+    {
+        UPS = 25;
+        p1Score = 0;
+        p2Score = 0;
+        scored = 0;
+        p1Pos = p2Pos = (LCD_HEIGHT + 8) / 2;
+        movSpeed = 5;
+        paddleThickness = 3;
+        paddleWidth = 16;
+        ballPos = (point) {.x = LCD_WIDTH / 2, .y = (LCD_HEIGHT + 8) / 2};
+        ballSpeed = (point) {.x = -4, .y = 3};
+        ballSize = (point) {.x = 4, .y = 4};
+        
+        time = 0;
+        GE_STPop();
+        fReset = 0;
+        
+        // Borders
+        LCD_gFillRect(0, 0, LCD_WIDTH, topBorder, LCD_WHITE);
+        LCD_gHLine(0, LCD_WIDTH, bottomBorder, 1, LCD_WHITE);
+        
+        scoreBoard[0][2] = '0';
+        scoreBoard[0][1] = ' ';
+        scoreBoard[0][0] = ' ';
+        scoreBoard[0][3] = '\0';
+        scoreBoard[1][2] = '0';
+        scoreBoard[1][1] = ' ';
+        scoreBoard[1][0] = ' ';
+        scoreBoard[1][3] = '\0';
+        LCD_SetBGColor(LCD_WHITE);
+        LCD_gString(1, 0, scoreBoard[0], 0, LCD_BLACK);
+        LCD_gString(17, 0, scoreBoard[1], 0, LCD_BLACK);
+        LCD_SetBGColor(settings.BGColor);
+        
+        // Paddles
+        LCD_gFillRect(paddleX, p1Pos - (paddleWidth >> 1), paddleThickness, paddleWidth, LCD_LIGHT_GREY);
+        LCD_gFillRect(LCD_WIDTH - paddleX - paddleThickness, p2Pos - (paddleWidth >> 1), paddleThickness, paddleWidth, LCD_LIGHT_GREY);
+        
+        // Ball
+        LCD_gFillRect(ballPos.x - (ballSize.x >> 1), ballPos.y - (ballSize.y >> 1), ballSize.x, ballSize.y, LCD_LIGHT_GREY);
+        
+        return 1;
+    }
+    
+    time += GE_STPop();
+    if (time < (CLOCKS_PER_SEC / UPS))
+        return 1;
+    time = 0;
+
+    // Scored and reset precedure
+    if (scored)
+    {
+        if (scored == scoredTimeout)
+        {
+            LCD_gFillRect(ballPos.x - (ballSize.x >> 1), ballPos.y - (ballSize.y >> 1), ballSize.x, ballSize.y, settings.BGColor);
+
+            ballPos = (point) {.x = LCD_WIDTH / 2, .y = (LCD_HEIGHT + 8) / 2};
+
+            ballSpeed.y = GE_Rand() % (ballSize.y << 1) - ballSize.y;
+
+            // Scoreboard update
+            scoreBoard[0][2] = '0' + p1Score % 10;
+            scoreBoard[0][1] = (p1Score >= 10) ? '0' + (p1Score % 100 - p1Score % 10) / 10 : ' ';
+            scoreBoard[0][0] = (p1Score >= 100) ? '0' + (p1Score % 1000 - p1Score % 100) / 100 : ' ';
+            scoreBoard[0][3] = '\0';
+            scoreBoard[1][2] = '0' + p2Score % 10;
+            scoreBoard[1][1] = (p2Score >= 10) ? '0' + (p2Score % 100 - p2Score % 10) / 10 : ' ';
+            scoreBoard[1][0] = (p2Score >= 100) ? '0' + (p2Score % 1000 - p2Score % 100) / 100 : ' ';
+            scoreBoard[1][3] = '\0';
+            LCD_SetBGColor(LCD_WHITE);
+            LCD_gString(1, 0, scoreBoard[0], 0, LCD_BLACK);
+            LCD_gString(17, 0, scoreBoard[1], 0, LCD_BLACK);
+            LCD_SetBGColor(settings.BGColor);
+        }
+        scored--;
+    }
+    
+    // Erase if moved
+        // Paddles
+    if (JS.down || JS.up) LCD_gFillRect(paddleX, p1Pos - (paddleWidth >> 1), paddleThickness, paddleWidth, settings.BGColor);
+    if (SW1.held ^ SW2.held) LCD_gFillRect(LCD_WIDTH - paddleX - paddleThickness, p2Pos - (paddleWidth >> 1), paddleThickness, paddleWidth, settings.BGColor);
+    
+        // Ball
+    if (!scored) LCD_gFillRect(ballPos.x - (ballSize.x >> 1), ballPos.y - (ballSize.y >> 1), ballSize.x, ballSize.y, settings.BGColor);
+    if (ballPos.y > LCD_HEIGHT - ballSize.y) LCD_gHLine(0, LCD_WIDTH, bottomBorder, 1, LCD_WHITE);
+    if (ballPos.y <= topBorder + ballSize.y)
+    {
+        LCD_SetBGColor(LCD_WHITE);
+        LCD_gString(1, 0, scoreBoard, 0, LCD_BLACK);
+        LCD_SetBGColor(settings.BGColor);
+    }
+    
+    // Move
+        // Paddle player 1
+    if (JS.down)
+        p1Pos = min(p1Pos + movSpeed, bottomBorder - (paddleWidth >> 1));
+    else if (JS.up)
+        p1Pos = max(p1Pos - movSpeed, topBorder + (paddleWidth >> 1));
+    
+        // Paddle player 2
+    if (SW1.held && !SW2.held)
+        p2Pos = max(p2Pos - movSpeed, topBorder + (paddleWidth >> 1));
+    else if (!SW1.held && SW2.held)
+        p2Pos = min(p2Pos + movSpeed, bottomBorder - (paddleWidth >> 1));
+    
+        // Ball
+    // Collisions
+        // Goals
+    if (!scored)
+    {
+        if (ballPos.x + ballSpeed.x - (ballSize.x >> 1) <= 0)
+        {
+            scored = scoredTimeout;
+            p2Score++;
+            ballSpeed.x = -ballSpeed.x;
+        }
+        else if (ballPos.x + ballSpeed.x + (ballSize.x >> 1) > LCD_WIDTH)
+        {
+            scored = scoredTimeout;
+            p1Score++;
+            ballSpeed.x = -ballSpeed.x;
+        }
+            // Top and bottom borders
+        if (ballPos.y + ballSpeed.y - (ballSize.y >> 1) <= topBorder ||
+            ballPos.y + ballSpeed.y + (ballSize.y >> 1) > bottomBorder)
+            ballSpeed.y = -ballSpeed.y;
+        
+            // P1 paddle
+        if (ballPos.x + ballSpeed.x - (ballSize.x >> 1) <= paddleX + paddleThickness &&
+            (ballPos.y + ballSpeed.y - (ballSize.y >> 1) <= p1Pos + (paddleWidth >> 1) &&
+            ballPos.y + ballSpeed.y + (ballSize.y >> 1) >= p1Pos - (paddleWidth >> 1)))
+        {
+            ballSpeed.x = -ballSpeed.x;
+            ballSpeed.y = (ballPos.y - p1Pos) >> 1;
+        }
+            // P2 paddle
+        if (ballPos.x + ballSpeed.x + (ballSize.x >> 1) > LCD_WIDTH - paddleX - paddleThickness &&
+            (ballPos.y + ballSpeed.y - (ballSize.y >> 1) <= p2Pos + (paddleWidth >> 1) &&
+            ballPos.y + ballSpeed.y + (ballSize.y >> 1) >= p2Pos - (paddleWidth >> 1)))
+        {
+            ballSpeed.x = -ballSpeed.x;
+            ballSpeed.y = (ballPos.y - p2Pos) >> 1;
+        }
+
+        ballPos.x += ballSpeed.x;
+        ballPos.y += ballSpeed.y;
+    }
+    
+    // Draw  if moved
+        // Paddles
+    if (JS.down || JS.up) LCD_gFillRect(paddleX, p1Pos - (paddleWidth >> 1), paddleThickness, paddleWidth, LCD_LIGHT_GREY);
+    if (SW1.held ^ SW2.held) LCD_gFillRect(LCD_WIDTH - paddleX - paddleThickness, p2Pos - (paddleWidth >> 1), paddleThickness, paddleWidth, LCD_LIGHT_GREY);
+    
+        // Ball
+    if (scored != scoredTimeout) LCD_gFillRect(ballPos.x - (ballSize.x >> 1), ballPos.y - (ballSize.y >> 1), ballSize.x, ballSize.y, LCD_LIGHT_GREY);
     
     return 1;
 }

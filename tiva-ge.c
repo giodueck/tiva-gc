@@ -1,4 +1,5 @@
 #include "tiva-ge.h"
+#include "xorshift.h"
 
 GE_Button SW1 = {0}, SW2 = {0}, SEL = {0};
 GE_Joystick JS = {0};
@@ -6,8 +7,11 @@ GE_Joystick JS = {0};
 static void (*_mainMenu)(void) = NULL;
 static int (*_update)(void) = NULL;
 
+static uint32_t xorshift32_state = 0x12345678;
+
 void GE_Input(void);
 void SysTick_Handler(void);
+void GE_SRand(uint32_t seed);
 
 void SysTick_Handler(void)
 {
@@ -31,6 +35,11 @@ char GE_STGetCount(void)
     return SysTick->CTRL >> 16;
 }
 
+uint32_t GE_Rand(void)
+{
+    return xorshift32_state = xorshift32(xorshift32_state);
+}
+
 // Performs input and screen initializations and clears screen to black.
 void GE_Setup(void)
 {
@@ -47,6 +56,14 @@ void GE_Setup(void)
     
     // SysTick init
     SysTick_Init(CLOCKS_PER_SEC, OFF);
+
+    // RNG seed, 32 bits of noise generated from ADC
+    for (int i = 0; i < 8; i++)
+    {
+        JS.pos = Input_ReadJoystickRaw();
+        xorshift32_state ^= ((JS.pos.x & 0x03) << 2) | (JS.pos.y & 0x03);
+        xorshift32_state <<= 4;
+    }
 
     // Settings
     JS.threshold = (point) { .x = 1024, .y = 1024 };

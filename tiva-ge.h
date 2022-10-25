@@ -71,4 +71,10 @@ int GE_STPop(void);
 //      1 if reloaded, 0 if not
 char GE_STGetCount(void);
 
+// Generate pseudo-random number
+// Uses an xorshift with 3 shifts for a period of 2^32 - 1
+// Return:
+//      32 bit pseudo-random number
+uint32_t GE_Rand(void);
+
 #endif // TIVA_GE_H
