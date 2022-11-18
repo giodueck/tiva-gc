@@ -59,7 +59,7 @@ void menu()
         LCD_gClear();
         LCD_gFillRect(0, 0, LCD_WIDTH - 1, 9, LCD_DARK_GREY);
         LCD_SetBGColor(LCD_RED);
-        LCD_gString(0, 0, "Menu V1", 0, LCD_RED);
+        LCD_gString(0, 0, "Tiva GC", 0, LCD_RED);
 
         LCD_gFillRect(0, LCD_HEIGHT - 8, LCD_WIDTH - 1, 8, LCD_DARK_GREY);
         // LCD_gString(14, 15, "Menu V1", 0, LCD_RED);

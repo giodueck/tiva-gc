@@ -1,5 +1,6 @@
 #include "tiva-ge.h"
 #include "xorshift.h"
+#include "delay.h"
 
 GE_Button SW1 = {0}, SW2 = {0}, SEL = {0};
 GE_Joystick JS = {0};
@@ -11,6 +12,7 @@ static uint32_t xorshift32_state = 0x12345678;
 
 void GE_Input(void);
 void GE_SRand(uint32_t seed);
+void GE_Intro(void);
 
 int GE_STPop(void)
 {
@@ -112,11 +114,43 @@ void GE_SetUpdate(int (*func)(void))
     _update = func;
 }
 
+// Show a little intro card, with the project name and a small wireframe of the console
+void GE_Intro(void)
+{
+    LCD_gFillRect(LCD_WIDTH / 8, LCD_HEIGHT / 8, LCD_WIDTH * 3 / 4, LCD_HEIGHT * 3 / 4, LCD_RED);
+    LCD_gRect(LCD_WIDTH / 8, LCD_HEIGHT / 8, LCD_WIDTH * 3 / 4, LCD_HEIGHT * 3 / 4, 2, LCD_WHITE);
+
+    LCD_SetBGColor(LCD_RED);
+    LCD_gString(7, 3, "Tiva GC", 0, LCD_WHITE);
+
+    // EDUMKII outline
+    LCD_gCircle(48, 64, 10, 1, LCD_WHITE);
+    LCD_gCircle(80, 64, 10, 1, LCD_WHITE);
+    LCD_gFillRect(50, 54, 29, 20, LCD_RED);
+    LCD_gLine(49, 54, 79, 54, 1, LCD_WHITE);
+    LCD_gLine(49, 74, 79, 74, 1, LCD_WHITE);
+    // Tiva outcrop
+    LCD_gRect(56, 74, 16, 4, 1, LCD_WHITE);
+    // EDUMKII JS
+    LCD_gCircle(48, 63, 4, 1, LCD_WHITE);
+    LCD_gCircle(48, 63, 5, 1, LCD_WHITE);
+    // EDUMKII Buttons
+    LCD_gCircle(77, 60, 2, 1, LCD_WHITE);
+    LCD_gCircle(77, 65, 2, 1, LCD_WHITE);
+    // EDUMKII LCD
+    LCD_gRect(60, 61, 8, 10, 1, LCD_WHITE);
+
+    LCD_SetBGColor(LCD_BLACK);
+
+    delay(1500);
+}
+
 // Runs the main menu and gameloop
 void GE_Loop(void)
 {
     LCD_SetBGColor(LCD_BLACK);
     LCD_gClear();
+    GE_Intro();
 
     // Checks for menus or games set
     if (!_mainMenu && !_update)
