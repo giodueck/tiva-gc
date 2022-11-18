@@ -135,8 +135,8 @@ void GE_Intro(void)
     LCD_gCircle(48, 63, 4, 1, LCD_WHITE);
     LCD_gCircle(48, 63, 5, 1, LCD_WHITE);
     // EDUMKII Buttons
-    LCD_gCircle(77, 60, 2, 1, LCD_WHITE);
-    LCD_gCircle(77, 65, 2, 1, LCD_WHITE);
+    LCD_gCircle(83, 60, 2, 1, LCD_WHITE);
+    LCD_gCircle(83, 65, 2, 1, LCD_WHITE);
     // EDUMKII LCD
     LCD_gRect(60, 61, 8, 10, 1, LCD_WHITE);
 
