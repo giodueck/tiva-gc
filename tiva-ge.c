@@ -11,7 +11,6 @@ static int (*_update)(void) = NULL;
 static uint32_t xorshift32_state = 0x12345678;
 
 void GE_Input(void);
-void GE_SRand(uint32_t seed);
 void GE_Intro(void);
 
 int GE_STPop(void)
