@@ -1,6 +1,9 @@
 #include <stdint.h>
-#include "TM4C123GH6PM.h"
+#include <stdbool.h>
+#include "LCD.h"
+#include "driverlib/sysctl.h"
 #include "tiva-gc.h"
+#include "inc/tm4c123gh6pm.h"
 
 // Indicates a reset is needed for the currently selected update function or the menu
 static uint8_t fReset = 0;
@@ -171,7 +174,7 @@ int snake_config(void)
         "Sanic "
     };
     uint32_t speeds[4] = { 5, 7, 10, 15};
-    
+
     if (fReset == 1)
     {
         LCD_gString(1, 2, "Snake speed:", 0, LCD_WHITE);
@@ -181,7 +184,7 @@ int snake_config(void)
         LCD_SetBGColor(settings.BGColor);
         LCD_gString(14, 4, options[2], 0, LCD_WHITE);
         LCD_gString(14, 5, options[3], 0, LCD_WHITE);
-        
+
         option = 1;
         fReset = 2;
     }
@@ -189,18 +192,18 @@ int snake_config(void)
     if (JS.down && !JS_old.down)
     {
         LCD_gString(14, 2 + option, options[option], 0, LCD_WHITE);
-        
+
         option = (option + 1) & 0x03;
-        
+
         LCD_SetBGColor(LCD_LIGHT_GREY);
         LCD_gString(14, 2 + option, options[option], 0, LCD_BLACK);
         LCD_SetBGColor(settings.BGColor);
     } else if (JS.up && !JS_old.up)
     {
         LCD_gString(14, 2 + option, options[option], 0, LCD_WHITE);
-        
+
         option = (option + 3) & 0x03;
-        
+
         LCD_SetBGColor(LCD_LIGHT_GREY);
         LCD_gString(14, 2 + option, options[option], 0, LCD_BLACK);
         LCD_SetBGColor(settings.BGColor);
@@ -212,7 +215,7 @@ int snake_config(void)
         UPS = speeds[option];
         return 1;
     }
-    
+
     return 0;
 }
 
@@ -242,7 +245,7 @@ void snake_spawn_food(int8_t cells[][2], uint16_t tail_idx)
             }
         }
     }
-    
+
     cells[tail_idx + 1][0] = x;
     cells[tail_idx + 1][1] = y;
 }
@@ -306,10 +309,10 @@ int snake()
         LCD_gFillRect(2 + (cells[2][0] << 2), 3 + (cells[2][1] << 2), 4, 2, LCD_RED);
         LCD_gFillRect(3 + (cells[2][0] << 2), 5 + (cells[2][1] << 2), 2, 1, LCD_RED);
         LCD_gFillRect(3 + (cells[2][0] << 2), 2 + (cells[2][1] << 2), 2, 1, LCD_GREEN);
-        
+
         fReset = 0;
         game_over = 0;
-        
+
         return 1;
     }
 
@@ -342,9 +345,8 @@ int snake()
     if (time >= (CLOCKS_PER_SEC / UPS)) // delay
         time = 0;
     else
+        return 1;
 
-    return 1;
-    
     old_facing = facing;    // for drawing purposes
     facing = input;         // accept last input
 
@@ -457,13 +459,13 @@ int snake()
             LCD_gFillRect(3 + (cells[1][0] << 2), 3 + (cells[1][1] << 2), 2, 3, LCD_GREEN);
         else if (old_facing == DOWN || facing == UP)
             LCD_gFillRect(3 + (cells[1][0] << 2), 2 + (cells[1][1] << 2), 2, 3, LCD_GREEN);
-        
+
         if (old_facing == RIGHT || facing == LEFT)
             LCD_gFillRect(2 + (cells[1][0] << 2), 3 + (cells[1][1] << 2), 1, 2, LCD_GREEN);
         else if (old_facing == LEFT || facing == RIGHT)
             LCD_gFillRect(5 + (cells[1][0] << 2), 3 + (cells[1][1] << 2), 1, 2, LCD_GREEN);
     }
-    
+
     return 1;
 }
 
@@ -477,7 +479,7 @@ int pong(void)
     static uint32_t time;
     const int32_t topBorder = 9, bottomBorder = LCD_HEIGHT - 1, paddleX = 2, scoredTimeout = UPS;
     static char scoreBoard[2][4];
-    
+
     if (fReset)
     {
         UPS = 25;
@@ -491,15 +493,15 @@ int pong(void)
         ballPos = (point) {.x = LCD_WIDTH / 2, .y = (LCD_HEIGHT + 8) / 2};
         ballSpeed = (point) {.x = -4, .y = 0};
         ballSize = (point) {.x = 4, .y = 4};
-        
+
         time = 0;
         GE_STPop();
         fReset = 0;
-        
+
         // Borders
         LCD_gFillRect(0, 0, LCD_WIDTH, topBorder, LCD_WHITE);
         LCD_gHLine(0, LCD_WIDTH, bottomBorder, 1, LCD_WHITE);
-        
+
         scoreBoard[0][2] = '0';
         scoreBoard[0][1] = ' ';
         scoreBoard[0][0] = ' ';
@@ -512,17 +514,17 @@ int pong(void)
         LCD_gString(1, 0, scoreBoard[0], 0, LCD_BLACK);
         LCD_gString(17, 0, scoreBoard[1], 0, LCD_BLACK);
         LCD_SetBGColor(settings.BGColor);
-        
+
         // Paddles
         LCD_gFillRect(paddleX, p1Pos - (paddleWidth >> 1), paddleThickness, paddleWidth, LCD_LIGHT_GREY);
         LCD_gFillRect(LCD_WIDTH - paddleX - paddleThickness, p2Pos - (paddleWidth >> 1), paddleThickness, paddleWidth, LCD_LIGHT_GREY);
-        
+
         // Ball
         LCD_gFillRect(ballPos.x - (ballSize.x >> 1), ballPos.y - (ballSize.y >> 1), ballSize.x, ballSize.y, LCD_LIGHT_GREY);
-        
+
         return 1;
     }
-    
+
     time += GE_STPop();
     if (time < (CLOCKS_PER_SEC / UPS))
         return 1;
@@ -555,35 +557,35 @@ int pong(void)
         }
         scored--;
     }
-    
+
     // Erase if moved
         // Paddles
     if (JS.down || JS.up) LCD_gFillRect(paddleX, p1Pos - (paddleWidth >> 1), paddleThickness, paddleWidth, settings.BGColor);
     if (SW1.held ^ SW2.held) LCD_gFillRect(LCD_WIDTH - paddleX - paddleThickness, p2Pos - (paddleWidth >> 1), paddleThickness, paddleWidth, settings.BGColor);
-    
+
         // Ball
     if (!scored) LCD_gFillRect(ballPos.x - (ballSize.x >> 1), ballPos.y - (ballSize.y >> 1), ballSize.x, ballSize.y, settings.BGColor);
     if (ballPos.y > LCD_HEIGHT - ballSize.y) LCD_gHLine(0, LCD_WIDTH, bottomBorder, 1, LCD_WHITE);
     if (ballPos.y <= topBorder + ballSize.y)
     {
         LCD_SetBGColor(LCD_WHITE);
-        LCD_gString(1, 0, scoreBoard, 0, LCD_BLACK);
+        LCD_gString(1, 0, scoreBoard[0], 0, LCD_BLACK);
         LCD_SetBGColor(settings.BGColor);
     }
-    
+
     // Move
         // Paddle player 1
     if (JS.down)
         p1Pos = min(p1Pos + movSpeed, bottomBorder - (paddleWidth >> 1));
     else if (JS.up)
         p1Pos = max(p1Pos - movSpeed, topBorder + (paddleWidth >> 1));
-    
+
         // Paddle player 2
     if (SW1.held && !SW2.held)
         p2Pos = max(p2Pos - movSpeed, topBorder + (paddleWidth >> 1));
     else if (!SW1.held && SW2.held)
         p2Pos = min(p2Pos + movSpeed, bottomBorder - (paddleWidth >> 1));
-    
+
         // Ball
     // Collisions
         // Goals
@@ -605,7 +607,7 @@ int pong(void)
         if (ballPos.y + ballSpeed.y - (ballSize.y >> 1) <= topBorder ||
             ballPos.y + ballSpeed.y + (ballSize.y >> 1) > bottomBorder)
             ballSpeed.y = -ballSpeed.y;
-        
+
             // P1 paddle
         if (ballPos.x + ballSpeed.x - (ballSize.x >> 1) <= paddleX + paddleThickness &&
             (ballPos.y + ballSpeed.y - (ballSize.y >> 1) <= p1Pos + (paddleWidth >> 1) &&
@@ -626,23 +628,26 @@ int pong(void)
         ballPos.x += ballSpeed.x;
         ballPos.y += ballSpeed.y;
     }
-    
+
     // Draw  if moved
         // Paddles
     if (JS.down || JS.up) LCD_gFillRect(paddleX, p1Pos - (paddleWidth >> 1), paddleThickness, paddleWidth, LCD_LIGHT_GREY);
     if (SW1.held ^ SW2.held) LCD_gFillRect(LCD_WIDTH - paddleX - paddleThickness, p2Pos - (paddleWidth >> 1), paddleThickness, paddleWidth, LCD_LIGHT_GREY);
-    
+
         // Ball
     if (scored != scoredTimeout) LCD_gFillRect(ballPos.x - (ballSize.x >> 1), ballPos.y - (ballSize.y >> 1), ballSize.x, ballSize.y, LCD_LIGHT_GREY);
-    
+
     return 1;
 }
 
 int main()
 {
+    SysCtlClockSet(SYSCTL_SYSDIV_12_5|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|
+                   SYSCTL_OSC_MAIN);
+
     GE_Setup();
 
     GE_SetMainMenu(menu);
-    
+
     GE_Loop();
 }

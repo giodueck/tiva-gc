@@ -2,6 +2,7 @@
 #define TIVA_GC_INC_H
 
 #include <stddef.h>
+#include <stdint.h>
 
 #define max(a, b) ((a) > (b) ? (a) : (b))
 #define min(a, b) ((a) < (b) ? (a) : (b))

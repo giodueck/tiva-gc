@@ -1,5 +1,5 @@
 #include <stdint.h>
-#include "TM4C123GH6PM.h"
+#include "inc/tm4c123gh6pm.h"
 #include "tiva-gc.h"
 
 void GEdemoMenu(void)
@@ -43,7 +43,7 @@ int GEdemo(void)
     GE_Setup();
 
     GE_SetMainMenu(GEdemoMenu);
-    
+
     GE_Loop();
 }
 
@@ -84,7 +84,7 @@ int textdemo(void)
     // Output init
     LCD_Init();
     LCD_CS(LOW);
-    
+
     LCD_SetBGColor(LCD_BLACK);
     LCD_gClear();
 
@@ -133,7 +133,7 @@ int graphicsdemo(void)
     pixel colors[6] = { LCD_RED, LCD_YELLOW, LCD_GREEN, LCD_CYAN, LCD_BLUE, LCD_MAGENTA };
     uint8_t i = 0, changeFlag = 0;
     point old_rhombus[4], rhombus[4];
-    
+
     // Input init
     InitGPIO_EdumkiiButtons();
     InitGPIO_EdumkiiJoystick();
@@ -141,7 +141,7 @@ int graphicsdemo(void)
     // Output init
     LCD_Init();
     LCD_CS(LOW);
-    
+
     LCD_SetBGColor(LCD_BLACK);
     actSettings = LCD_GetSettings();
     js = Input_ReadJoystick();    // don't need that much precision
@@ -204,7 +204,7 @@ int graphicsdemo(void)
             pos.y = 2;
         else if (pos.y >= LCD_HEIGHT)
             pos.y = LCD_HEIGHT - 1;
-        
+
         // for (int j = 0; j < 4; j++)
         //     old_rhombus[j] = rhombus[j];
 
@@ -228,7 +228,7 @@ int graphicsdemo(void)
             // LCD_gPolygon(old_rhombus, 4, 1, actSettings.BGColor);
             LCD_gCircle(old_pos.x, old_pos.y, 6, 1, actSettings.BGColor);
             // LCD_gFillCircle(old_pos.x, old_pos.y, 7, actSettings.BGColor);
-            
+
             // Draw new shapes
             // LCD_gRect((uint8_t) pos.x - 5, (uint8_t) pos.y - 5, 10, 10, 1, colors[i]);
             LCD_gLine(64, 64, (uint8_t) pos.x, (uint8_t) pos.y, 1, colors[i]);

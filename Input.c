@@ -12,16 +12,16 @@ int Input_ReadButtonRaw(int button)
     {
         #ifdef DISABLE_LCD
         case BUTTON_TIVAC_SW1:
-            return ((GPIOF->DATA & 0x10) >> 4) ^ 0x01;
+            return ((GPIO_PORTF_DATA_R & 0x10) >> 4) ^ 0x01;
         case BUTTON_TIVAC_SW2:
-            return (GPIOF->DATA & 0x01) ^ 0x01;
+            return (GPIO_PORTF_DATA_R & 0x01) ^ 0x01;
         #endif
         case BUTTON_EDUMKII_SW1:
-            return ((GPIOD->DATA & 0x40) >> 6) ^ 0x01;
+            return ((GPIO_PORTD_DATA_R & 0x40) >> 6) ^ 0x01;
         case BUTTON_EDUMKII_SW2:
-            return ((GPIOD->DATA & 0x80) >> 7) ^ 0x01;
+            return ((GPIO_PORTD_DATA_R & 0x80) >> 7) ^ 0x01;
         case BUTTON_EDUMKII_SEL:
-            return ((GPIOE->DATA & 0x10) >> 4) ^ 0x01;
+            return ((GPIO_PORTE_DATA_R & 0x10) >> 4) ^ 0x01;
         default:
             return 0;
     }
@@ -116,19 +116,19 @@ int Input_ReadButton(int button)
 point Input_ReadJoystickRaw(void)
 {
     point p;
-    
-    ADC0->SSMUX2 = 4;
-    ADC0->PSSI = 0x0004;            // initiate SS2
-    while((ADC0->RIS & 0x04) == 0); // wait for conversion done
-    p.x = ADC0->SSFIFO2 & 0xFFF;    // read first result
-    ADC0->ISC = 0x0004;             // acknowledge completion
-    
-    ADC0->SSMUX2 = 11;
-    ADC0->PSSI = 0x0004;            // initiate SS2
-    while((ADC0->RIS & 0x04) == 0); // wait for conversion done
-    p.y = ADC0->SSFIFO2 & 0xFFF;    // read second result
-    ADC0->ISC = 0x0004;             // acknowledge completion
-    
+
+    ADC0_SSMUX2_R = 4;
+    ADC0_PSSI_R = 0x0004;            // initiate SS2
+    while((ADC0_RIS_R & 0x04) == 0); // wait for conversion done
+    p.x = ADC0_SSFIFO2_R & 0xFFF;    // read first result
+    ADC0_ISC_R = 0x0004;             // acknowledge completion
+
+    ADC0_SSMUX2_R = 11;
+    ADC0_PSSI_R = 0x0004;            // initiate SS2
+    while((ADC0_RIS_R & 0x04) == 0); // wait for conversion done
+    p.y = ADC0_SSFIFO2_R & 0xFFF;    // read second result
+    ADC0_ISC_R = 0x0004;             // acknowledge completion
+
     return p;
 }
 

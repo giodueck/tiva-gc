@@ -1,4 +1,5 @@
 #include "tiva-ge.h"
+#include "systick.h"
 #include "xorshift.h"
 #include "delay.h"
 
@@ -16,18 +17,18 @@ void GE_Intro(void);
 int GE_STPop(void)
 {
     int t = GE_STGet();
-    SysTick->VAL = 0;
+    SYSTICK_VAL_R = 0;
     return t;
 }
 
 int GE_STGet(void)
 {
-    return CLOCKS_PER_SEC - SysTick->VAL;
+    return CLOCKS_PER_SEC - SYSTICK_VAL_R;
 }
 
 char GE_STGetCount(void)
 {
-    return SysTick->CTRL >> 16;
+    return SYSTICK_CTRL_R >> 16;
 }
 
 uint32_t GE_Rand(void)
@@ -38,6 +39,9 @@ uint32_t GE_Rand(void)
 // Performs input and screen initializations and clears screen to black.
 void GE_Setup(void)
 {
+    // SysTick init
+    SysTick_Init(CLOCKS_PER_SEC, OFF);
+
     // Input init
     InitGPIO_EdumkiiButtons();
     InitGPIO_EdumkiiJoystick();
@@ -45,12 +49,9 @@ void GE_Setup(void)
     // Output init
     LCD_Init();
     LCD_CS(LOW);
-    
+
     LCD_SetBGColor(LCD_BLACK);
     LCD_gClear();
-    
-    // SysTick init
-    SysTick_Init(CLOCKS_PER_SEC, OFF);
 
     // RNG seed, 32 bits of noise generated from ADC
     for (int i = 0; i < 8; i++)
@@ -164,7 +165,7 @@ void GE_Loop(void)
     {
         GE_Input();
     }
-    
+
     // Main program loop
     while (1)
     {

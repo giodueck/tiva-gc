@@ -1,5 +1,5 @@
 #include "LCD.h"
-#include "TM4C123GH6PM.h"
+#include "inc/tm4c123gh6pm.h"
 #include "delay.h"
 #include "tiva-gc-inc.h"
 
@@ -329,34 +329,37 @@ void LCD_gCharT(int16_t x, int16_t y, char c, pixel textColor, uint8_t size);
 // Initializes SSI as SPI to EDUMKII display
 void InitSPI(void)
 {
-    SYSCTL->RCGCSSI |= (1 << 2);            // Enable SSI2
-    SYSCTL->RCGCGPIO |= 0x03;               // Enable GPIOA & B
-    while (!(SYSCTL->PRGPIO & 0x03));       // Wait for enabled signal
-    
-    GPIOB->AFSEL |= (1 << 4) | (1 << 7);    // AF for PB4, PB7 which are Clk and MOSI
-    GPIOB->PCTL |= (2 << 16) | (2 << 28);   // Select right AF pins
-    GPIOB->DEN |= (1 << 4) | (1 << 7);      // Digital enable
-    
-    GPIOA->CR |= (1 << 4);                  // Enable pin 4
-    GPIOA->AFSEL &= ~(1 << 4);              // Disable AF for PA4 which is CS
-    GPIOA->DIR |= (1 << 4);                 // PA4 is output
-    GPIOA->DEN |= (1 << 4);                 // Digital enable
-    GPIOA->DATA |= (1 << 4);                // CS high disables transmission
-    
-    SSI2->CR1 &= ~(1 << 1);                 // Ensure SSE bit is 0 before making changes
-    SSI2->CR1 = 0x0;                        // Set SSI as master
-    SSI2->CC = 0x0;                         // Set SSI clock source
-    SSI2->CPSR = 2;                         // Clock prescale divisor
-    SSI2->CR0 = (2 << 8) | 0x07;            // Set serial clock rate, clock phase/polarity, protocol mode, data size (DSS)
-    SSI2->CR1 |= (1 << 1);                  // Enable SSI by setting SSE bit
-    
-    SYSCTL->RCGCGPIO |= (1 << 5);           // Enable GPIOF
-    while (!(SYSCTL->PRGPIO & (1 << 5)));   // Wait for enabled signal
-    
-    GPIOF->CR |= 1 | (1 << 4);              // PF0 is Reset negative, low is reset, PF4 is Register select, or D/C pin
-    GPIOF->PUR &= ~(1 | (1 << 4));          // No pull up, in case buttons were set up
-    GPIOF->DIR |= 1 | (1 << 4);             // Output
-    GPIOF->DEN |= 1 | (1 << 4);             // Digital enable
+    SYSCTL_RCGCSSI_R |= (1 << 2);            // Enable SSI2
+    SYSCTL_RCGCGPIO_R |= 0x03;               // Enable GPIOA & B
+    while (!(SYSCTL_PRGPIO_R & 0x03));       // Wait for enabled signal
+
+    GPIO_PORTB_AFSEL_R |= (1 << 4) | (1 << 7);    // AF for PB4, PB7 which are Clk and MOSI
+    GPIO_PORTB_PCTL_R |= (2 << 16) | (2 << 28);   // Select right AF pins
+    GPIO_PORTB_DEN_R |= (1 << 4) | (1 << 7);      // Digital enable
+
+    GPIO_PORTA_CR_R |= (1 << 4);                  // Enable pin 4
+    GPIO_PORTA_AFSEL_R &= ~(1 << 4);              // Disable AF for PA4 which is CS
+    GPIO_PORTA_DIR_R |= (1 << 4);                 // PA4 is output
+    GPIO_PORTA_DEN_R |= (1 << 4);                 // Digital enable
+    GPIO_PORTA_DATA_R |= (1 << 4);                // CS high disables transmission
+
+    SSI2_CR1_R &= ~(1 << 1);                 // Ensure SSE bit is 0 before making changes
+    SSI2_CR1_R = 0x0;                        // Set SSI as master
+    SSI2_CC_R = 0x0;                         // Set SSI clock source
+    SSI2_CPSR_R = 2;                         // Clock prescale divisor
+    SSI2_CR0_R = (0 << 8) | 0x07;            // Set serial clock rate, clock phase/polarity, protocol mode, data size (DSS)
+    SSI2_CR1_R |= (1 << 1);                  // Enable SSI by setting SSE bit
+
+    SYSCTL_RCGCGPIO_R |= (1 << 5);           // Enable GPIOF
+    while (!(SYSCTL_PRGPIO_R & (1 << 5)));   // Wait for enabled signal
+
+    GPIO_PORTF_LOCK_R = 0x4C4F434B;               //Unlock Port F
+    GPIO_PORTF_CR_R |= 1 | (1 << 4);              // PF0 is Reset negative, low is reset, PF4 is Register select, or D/C pin
+    GPIO_PORTF_AMSEL_R = 0x00;      //Disable analog functions
+    GPIO_PORTF_AFSEL_R = 0x00;      //Clear alt functions
+    GPIO_PORTF_PUR_R &= ~(1 | (1 << 4));          // No pull up, in case buttons were set up
+    GPIO_PORTF_DIR_R |= 1 | (1 << 4);             // Output
+    GPIO_PORTF_DEN_R |= 1 | (1 << 4);             // Digital enable
 }
 
 // LCD initialization
@@ -364,22 +367,22 @@ void InitSPI(void)
 void LCD_Init(void)
 {
     InitSPI();
-    
-    GPIOF->DATA |= HIGH;                    // Pull reset down, is negative logic
-    delay(150);
-    
+
+    GPIO_PORTF_DATA_R |= HIGH;                    // Pull reset down, is negative logic
+    delay(100);
+
     LCD_CS(LOW);
     LCD_Command(LCD_SWRESET);
     delay(150);           // 120 ms or more wait after SW reset
-    
+
     LCD_Command(LCD_SLPOUT);                // Turn off sleep mode
     delay(150);           // 120 ms or more wait after sleep out
-    
+
     LCD_Command(LCD_FRMCTR1);               // Framerate control
-    LCD_Data(0x00);
+    LCD_Data(0x01);
     LCD_Data(0x06);
     LCD_Data(0x03);
-    
+
     LCD_Command(LCD_PWCTR1);
     LCD_Data(0xA2);
     LCD_Data(0x02);
@@ -395,22 +398,22 @@ void LCD_Init(void)
     LCD_Command(LCD_PWCTR5);
     LCD_Data(0xEE);
     LCD_Data(0x8A);
-    
+
     _active_settings.MemoryAccessCTL = LCD_MADCTL_MX | LCD_MADCTL_MY | LCD_MADCTL_BGR;
     LCD_Command(LCD_MADCTL);                // Set memory access control
     LCD_Data(_active_settings.MemoryAccessCTL);
-    
+
     _active_settings.ColorMode = LCD_PIXEL_FORMAT_666;
     LCD_Command(LCD_COLMOD);                // Set interface pixel format
     LCD_Data(_active_settings.ColorMode);
     delay(10);
-    
+
     _active_settings.InversionMode = LCD_INVOFF;    // Screen inversion off
     LCD_Command(_active_settings.InversionMode);
     LCD_Command(LCD_GAMMA_PREDEFINED_4);    // Gamma curve 4
-    
+
     LCD_Command(LCD_TEOFF);
-    
+
     LCD_Command(LCD_DISPON);                // Turn LCD on
     delay(150);
 
@@ -447,8 +450,8 @@ void LCD_SetInversion(uint8_t flag)
 // Write a byte of data to the SPI buffer and wait for it to be sent
 void WriteSPI(uint8_t data)
 {
-    SSI2->DR = data;
-    while (!(SSI2->SR & 0x1));
+    SSI2_DR_R = data;
+    while (!(SSI2_SR_R & 0x1));
 }
 
 // LCD send command byte
@@ -457,7 +460,7 @@ void WriteSPI(uint8_t data)
 //      command: opcode
 void LCD_Command(uint8_t command)
 {
-    GPIOF->DATA &= ~(1 << 4);   // Command mode
+    GPIO_PORTF_DATA_R &= ~(1 << 4);   // Command mode
     WriteSPI(command);
 }
 
@@ -467,7 +470,7 @@ void LCD_Command(uint8_t command)
 //      data: data byte
 void LCD_Data(uint8_t data)
 {
-    GPIOF->DATA |= (1 << 4);    // Data mode
+    GPIO_PORTF_DATA_R |= (1 << 4);    // Data mode
     WriteSPI(data);
 }
 
@@ -478,7 +481,7 @@ void LCD_Data(uint8_t data)
 //      count: buffer element count
 void LCD_DataBuffer(uint8_t *buffer, uint32_t count)
 {
-    GPIOF->DATA |= (1 << 4);    // Data mode
+    GPIO_PORTF_DATA_R |= (1 << 4);    // Data mode
     for (uint32_t i = 0; i < count; i++)
     {
         WriteSPI(buffer[i]);
@@ -492,11 +495,11 @@ void LCD_DataBuffer(uint8_t *buffer, uint32_t count)
 void LCD_CS(uint8_t flag)
 {
     if (!flag)
-        GPIOA->DATA &= ~(1 << 4);
+        GPIO_PORTA_DATA_R &= ~(1 << 4);
     else
     {
         for (int i = 0; i < 15; i++);   // Small delay to end transmission with enough time to spare
-        GPIOA->DATA |= (1 << 4);
+        GPIO_PORTA_DATA_R |= (1 << 4);
     }
 }
 
@@ -510,7 +513,7 @@ void LCD_CS(uint8_t flag)
 void LCD_SetArea(int16_t colStart, int16_t rowStart, int16_t colEnd, int16_t rowEnd)
 {
     uint8_t buffer[4];
-    
+
     // Swap values if invalid
     if (colEnd < colStart)
     {
@@ -534,12 +537,12 @@ void LCD_SetArea(int16_t colStart, int16_t rowStart, int16_t colEnd, int16_t row
         colEnd = LCD_WIDTH - 1;
     if (rowEnd >= LCD_HEIGHT)
         rowEnd = LCD_HEIGHT - 1;
-    
+
     colStart += 2;
     colEnd += 2;
     rowStart += 3;
     rowEnd += 3;
-    
+
     /* write column address; requires 4 bytes of the buffer */
     buffer[0] = (colStart >> 8) & 0x00FF; /* MSB */ /* =0 for ST7735S */
     buffer[1] =  colStart       & 0x00FF; /* LSB */
@@ -547,7 +550,7 @@ void LCD_SetArea(int16_t colStart, int16_t rowStart, int16_t colEnd, int16_t row
     buffer[3] =  colEnd         & 0x00FF; /* LSB */
     LCD_Command(LCD_CASET);
     LCD_DataBuffer(buffer, 4);
-    
+
     /* write row address; requires 4 bytes of the buffer */
     buffer[0] = (rowStart >> 8) & 0x00FF; /* MSB */ /* =0 for ST7735S */
     buffer[1] =  rowStart       & 0x00FF; /* LSB */
@@ -621,10 +624,10 @@ void LCD_gClear()
 void LCD_gVLine(int16_t x, int16_t y1, int16_t y2, uint8_t stroke, pixel color)
 {
     int16_t aux;
-    
+
     if (stroke == 0)
         return;
-    
+
     if (y1 > y2)
     {
         aux = y1;
@@ -644,17 +647,17 @@ void LCD_gVLine(int16_t x, int16_t y1, int16_t y2, uint8_t stroke, pixel color)
 void LCD_gHLine(int16_t x1, int16_t x2, int16_t y, uint8_t stroke, pixel color)
 {
     int16_t aux;
-    
+
     if (stroke == 0)
         return;
-    
+
     if (x1 > x2)
     {
         aux = x1;
         x1 = x2;
         x2 = aux;
     }
-    
+
     // Check that the line is inside the screen. If not, no point clipping it to the edge
     if ((y - ((stroke - 1) >> 1) < 0 && y + (stroke >> 1) < 0) || (y - ((stroke - 1) >> 1) > (LCD_HEIGHT - 1) && y + (stroke >> 1) > (LCD_HEIGHT - 1)))
         return;
@@ -670,7 +673,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, p
     int16_t aux;
     uint8_t octant;
     int16_t x, y;
-   
+
     // 1. Define octant
     // Stay within one half to simplify calculations. This can be done by
     // swapping x's and y's when needed
@@ -691,7 +694,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, p
         y2 = y1;
         y1 = aux;
     }
-    
+
     // find slope avoiding division by 0 with vertical lines
     m = (float) (y2 - y1) / (x2 - x1);
 
@@ -704,7 +707,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, p
         octant = 8;
     else
         octant = 7;
-    
+
     // 2. Bresenham's
     x = x1;
     y = y1;
@@ -751,7 +754,7 @@ void LCD_gLine(int16_t x1, int16_t y1, int16_t x2, int16_t y2, uint8_t stroke, p
             // original line is already drawn
             if (i == 0)
                 continue;
-            
+
             // move coordinates somewhere else and draw line with stroke 1
             switch (octant)
             {
@@ -946,7 +949,7 @@ void LCD_gCircle(int16_t x, int16_t y, float r, uint8_t stroke, pixel color)
 
     if (r == 0.0f)
         return;
-    
+
     // intersections with X and Y are easy using the radius
     LCD_gDrawPixelE(x + r, y, color.r, color.g, color.b);
     LCD_gDrawPixelE(x - r, y, color.r, color.g, color.b);
@@ -960,7 +963,7 @@ void LCD_gCircle(int16_t x, int16_t y, float r, uint8_t stroke, pixel color)
         // draw point, copy over to other octants, update x_ and y_
         res = x_ * x_ + y_ * y_;
         res2 = x_ * x_ + (y_ - 1) * (y_ - 1);
-        
+
         if (res > r2 || res2 > res)
         {
             y_--;
@@ -993,7 +996,7 @@ void LCD_gFillCircle(int16_t x, int16_t y, float r, pixel color)
 
     if (r == 0.0f)
         return;
-    
+
     // intersections with X and Y are easy using the radius
     LCD_gHLine(x - r, x + r, y, 1, color);
     LCD_gDrawPixelE(x, y + r, color.r, color.g, color.b);
@@ -1006,7 +1009,7 @@ void LCD_gFillCircle(int16_t x, int16_t y, float r, pixel color)
         // draw point, copy over to other octants, update x_ and y_
         res = x_ * x_ + y_ * y_;
         res2 = x_ * x_ + (y_ - 1) * (y_ - 1);
-        
+
         // Lines only need to be drawn once for some octants, single pixels can be drawn if y_ does not change
         if (res > r2 || res2 > res)
         {
@@ -1047,7 +1050,7 @@ void LCD_gChar(int16_t x, int16_t y, char c, pixel textColor, pixel bgColor, uin
         (y + 8 * size - 1) >= LCD_HEIGHT ||
         x < 0 || y < 0)
         return;
-    
+
     if (textColor.r == bgColor.r && textColor.g == bgColor.g && textColor.b == bgColor.b)
     {
         LCD_gCharT(x, y, c, textColor, size);
@@ -1142,7 +1145,7 @@ uint32_t LCD_gString(int16_t x, int16_t y, const char *str, uint8_t len, pixel t
     uint32_t count = 0;
 
     if (y > 15) return 0;
-    
+
     while (*str)
     {
         LCD_gChar(x * 6, y * 8, *str, textColor, _active_settings.BGColor, 1);

@@ -7,7 +7,7 @@
 */
 
 #include <stdint.h>
-#include "TM4C123GH6PM.h"
+#include "inc/tm4c123gh6pm.h"
 #include "tiva-gc-inc.h"
 
 // Input_ReadButton functions always return 0 for the tiva board switches if DISABLE_LCD is not defined
